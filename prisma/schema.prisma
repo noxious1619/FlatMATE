@@ -8,75 +8,56 @@ datasource db {
   directUrl = env("DIRECT_URL")
 }
 
-// --------------------------------------------------------
-// 1. USERS
-// --------------------------------------------------------
 model User {
-  id            String   @id @default(uuid())
-  email         String   @unique
+  id            String         @id @default(uuid())
+  email         String         @unique
   name          String?
-  userName      String   @unique
+  userName      String         @unique
   phoneNumber   String?
-  college       String?
-  
-  isVerified    Boolean  @default(true)
-  isBlacklisted Boolean  @default(false)
-  
+  isVerified    Boolean        @default(false)
+  isBlacklisted Boolean        @default(false)
   profileImage  String?
   contactLink   String?
-  
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
-
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+  college       String?
   listings      Listing[]
   savedListings SavedListing[]
 }
 
-// --------------------------------------------------------
-// 2. LISTINGS
-// --------------------------------------------------------
 model Listing {
-  id          String   @id @default(uuid())
-  title       String
-  description String
-  price       Int
-  images      String[]
-  category    String  @default("ANY") // MALE, FEMALE, ANY
-  address     String?
-
-  isAvailable Boolean  @default(true)
-
-  // --- THE VIBE TAGS ---
-  tag_ac             Boolean @default(false)
-  tag_cooler         Boolean @default(false)
-  tag_noBrokerage    Boolean @default(false)
-  tag_wifi           Boolean @default(false)
-  tag_cook           Boolean @default(false)
-  tag_maid           Boolean @default(false)
-  tag_geyser         Boolean @default(false)
-  tag_metroNear      Boolean @default(false)
-  tag_noRestrictions Boolean @default(false)
-
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-
-  ownerId       String
-  owner         User           @relation(fields: [ownerId], references: [id], onDelete: Cascade)
-  savedByUsers  SavedListing[]
+  id                 String         @id @default(uuid())
+  title              String
+  description        String
+  price              Int
+  images             String[]
+  isAvailable        Boolean        @default(true)
+  tag_ac             Boolean        @default(false)
+  tag_cooler         Boolean        @default(false)
+  tag_noBrokerage    Boolean        @default(false)
+  tag_wifi           Boolean        @default(false)
+  tag_cook           Boolean        @default(false)
+  tag_maid           Boolean        @default(false)
+  tag_geyser         Boolean        @default(false)
+  tag_metroNear      Boolean        @default(false)
+  tag_noRestrictions Boolean        @default(false)
+  createdAt          DateTime       @default(now())
+  updatedAt          DateTime       @updatedAt
+  ownerId            String
+  address            String?
+  category           String         @default("ANY")
+  deposit            Int?
+  owner              User           @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  savedByUsers       SavedListing[]
 }
 
-// --------------------------------------------------------
-// 3. SAVED LISTINGS
-// --------------------------------------------------------
 model SavedListing {
   id        String   @id @default(uuid())
   savedAt   DateTime @default(now())
-
   userId    String
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  
   listingId String
   listing   Listing  @relation(fields: [listingId], references: [id], onDelete: Cascade)
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([userId, listingId])
 }

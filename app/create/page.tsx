@@ -5,9 +5,6 @@ import { Camera, IndianRupee, MapPin, Check, Type } from "lucide-react";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 
-// ⚠️ IMPORTANT: REPLACE THIS WITH THE LONG ID YOU COPIED EARLIER
-const TEMP_OWNER_ID = "fec254af-ab3f-4fa5-85fe-ca8a39c218bc"; 
-
 export default function CreateListing() {
   const router = useRouter();
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -22,8 +19,10 @@ export default function CreateListing() {
     description: ""
   });
 
+  const [images, setImages] = useState<File[]>([]);
+
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
-  
+
   const TAGS = ["AC", "Cooler", "No Brokerage", "Wifi", "Cook", "Maid", "Geyser", "Metro Near", "No Restrictions"];
 
   // 2. HANDLE INPUT CHANGES
@@ -40,20 +39,37 @@ export default function CreateListing() {
     }
   };
 
+  // 4. IMAGE UPLOAD TO CLOUDINARY
+  const handleImageUpload = async (file: File) => {
+    const formData = new FormData();
+    formData.append("file", file);
+    formData.append("upload_preset", "listing_images"); // replace with your preset
+
+    const res = await fetch("https://api.cloudinary.com/v1_1/dwg5nsiio/image/upload", {
+      method: "POST",
+      body: formData,
+    });
+
+    const data = await res.json();
+    return data.secure_url;
+  };
+
   // 3. SUBMIT TO API
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
 
     try {
+      // Image Upload
+      const imageUrls = await Promise.all(images.map(file => handleImageUpload(file)));
       // Prepare data for API (Mapping tags manually)
       const payload = {
         title: formData.title,
         description: `${formData.description}\n\n📍 Location: ${formData.location}\n👤 Preference: ${formData.gender}`,
         price: Number(formData.rent),
-        ownerId: TEMP_OWNER_ID,
-        images: [], // We'll handle image upload later
-        
+        deposit: Number(formData.deposit) || 0,
+        images: imageUrls, // We'll handle image upload later
+
         // Map frontend tags to backend boolean columns
         tag_ac: selectedTags.includes("AC"),
         tag_cooler: selectedTags.includes("Cooler"),
@@ -92,7 +108,7 @@ export default function CreateListing() {
       <Navbar />
 
       <div className="max-w-3xl mx-auto p-4">
-        
+
         {/* HEADER */}
         <div className="text-center mb-10">
           <h1 className="font-black text-4xl mb-2 uppercase tracking-tighter">Post a Room</h1>
@@ -110,17 +126,17 @@ export default function CreateListing() {
             </div>
 
             <div className="grid md:grid-cols-2 gap-6 mt-4">
-              
+
               {/* TITLE (New Field) */}
               <div className="md:col-span-2">
                 <label className="font-mono text-xs font-bold block mb-2">LISTING TITLE</label>
                 <div className="relative">
                   <Type className="absolute left-3 top-3 text-gray-400" size={20} />
-                  <input 
+                  <input
                     name="title"
                     value={formData.title}
                     onChange={handleChange}
-                    type="text" 
+                    type="text"
                     placeholder="e.g. Spacious Room in Sector 22"
                     required
                     className="w-full bg-gray-50 border-2 border-black pl-10 p-3 font-mono focus:bg-yellow-50 focus:outline-none transition-colors"
@@ -133,11 +149,11 @@ export default function CreateListing() {
                 <label className="font-mono text-xs font-bold block mb-2">EXPECTED RENT (₹)</label>
                 <div className="relative">
                   <IndianRupee className="absolute left-3 top-3 text-gray-400" size={20} />
-                  <input 
+                  <input
                     name="rent"
                     value={formData.rent}
                     onChange={handleChange}
-                    type="number" 
+                    type="number"
                     placeholder="e.g. 6500"
                     required
                     className="w-full bg-gray-50 border-2 border-black pl-10 p-3 font-mono focus:bg-yellow-50 focus:outline-none transition-colors"
@@ -150,11 +166,11 @@ export default function CreateListing() {
                 <label className="font-mono text-xs font-bold block mb-2">DEPOSIT / SECURITY (₹)</label>
                 <div className="relative">
                   <IndianRupee className="absolute left-3 top-3 text-gray-400" size={20} />
-                  <input 
+                  <input
                     name="deposit"
                     value={formData.deposit}
                     onChange={handleChange}
-                    type="number" 
+                    type="number"
                     placeholder="e.g. 6500"
                     className="w-full bg-gray-50 border-2 border-black pl-10 p-3 font-mono focus:bg-yellow-50 focus:outline-none transition-colors"
                   />
@@ -166,7 +182,7 @@ export default function CreateListing() {
                 <label className="font-mono text-xs font-bold block mb-2">EXACT LOCATION</label>
                 <div className="relative">
                   <MapPin className="absolute left-3 top-3 text-gray-400" size={20} />
-                  <select 
+                  <select
                     name="location"
                     value={formData.location}
                     onChange={handleChange}
@@ -188,13 +204,13 @@ export default function CreateListing() {
                 <div className="grid grid-cols-3 gap-4">
                   {["BOYS", "GIRLS", "ANYONE"].map((g) => (
                     <label key={g} className="cursor-pointer">
-                      <input 
-                        type="radio" 
-                        name="gender" 
+                      <input
+                        type="radio"
+                        name="gender"
                         value={g}
                         checked={formData.gender === g}
                         onChange={handleChange}
-                        className="peer sr-only" 
+                        className="peer sr-only"
                       />
                       <div className="text-center py-3 border-2 border-black font-black text-sm hover:bg-gray-100 peer-checked:bg-black peer-checked:text-white transition-all">
                         {g}
@@ -208,22 +224,54 @@ export default function CreateListing() {
 
           {/* SECTION 2: PHOTOS */}
           <section className="bg-white border-2 border-black p-6 shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] relative">
-             <div className="absolute -top-4 left-6 bg-[#FF914D] text-white font-bold px-3 py-1 border-2 border-black uppercase tracking-wider text-xs">
+            <div className="absolute -top-4 left-6 bg-[#FF914D] text-white font-bold px-3 py-1 border-2 border-black uppercase tracking-wider text-xs">
               Step 2: The Evidence
             </div>
-            
-            <div className="mt-4 border-2 border-dashed border-gray-300 bg-gray-50 p-10 text-center hover:bg-gray-100 transition-colors cursor-pointer group">
+
+            <div className="mt-4 border-2 border-dashed border-gray-300 bg-gray-50 p-10 text-center hover:bg-gray-100 transition-colors cursor-pointer relative">
+
+              {/* File Input */}
+              <input
+                type="file"
+                accept="image/*"
+                multiple
+                onChange={(e) => {
+                  if (e.target.files) {
+                    const files = Array.from(e.target.files).slice(0, 3); // max 3 images
+                    setImages(files); // save in state
+                  }
+                }}
+                className="absolute w-full h-full opacity-0 cursor-pointer top-0 left-0"
+              />
+
+              {/* Upload Icon */}
               <div className="w-16 h-16 bg-white border-2 border-black rounded-full flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform shadow-sm">
                 <Camera size={32} />
               </div>
+
               <h3 className="font-black text-lg uppercase">Upload Photos</h3>
-              <p className="font-mono text-xs text-gray-500">Max 3 images. (Feature Coming Soon)</p>
+              <p className="font-mono text-xs text-gray-500">Max 3 images</p>
+
+              {/* Preview Selected Images */}
+              {images.length > 0 && (
+                <div className="mt-4 flex gap-3 justify-center flex-wrap">
+                  {images.map((img, idx) => (
+                    <img
+                      key={idx}
+                      src={URL.createObjectURL(img)}
+                      alt={`Preview ${idx + 1}`}
+                      className="w-40 h-40 object-cover border-2 border-black"
+                    />
+                  ))}
+                </div>
+              )}
             </div>
           </section>
 
+
           {/* SECTION 3: THE VIBE */}
           <section className="bg-white border-2 border-black p-6 shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] relative">
-             <div className="absolute -top-4 left-6 bg-[#FFDE59] text-black font-bold px-3 py-1 border-2 border-black uppercase tracking-wider text-xs">
+            <div className="absolute -top-4 left-6 bg-[#FFDE59] text-black font-bold px-3 py-1 border-2 border-black uppercase tracking-wider text-xs">
               Step 3: The Vibe
             </div>
 
@@ -236,8 +284,8 @@ export default function CreateListing() {
                     type="button"
                     onClick={() => toggleTag(tag)}
                     className={`px-4 py-2 border-2 font-mono text-xs font-bold transition-all flex items-center gap-2
-                      ${selectedTags.includes(tag) 
-                        ? "bg-black text-white border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,0.5)]" 
+                      ${selectedTags.includes(tag)
+                        ? "bg-black text-white border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,0.5)]"
                         : "bg-white text-gray-600 border-gray-300 hover:border-black"
                       }`}
                   >
@@ -249,23 +297,23 @@ export default function CreateListing() {
             </div>
 
             <div className="mt-6">
-               <label className="font-mono text-xs font-bold block mb-2">DESCRIPTION / RULES</label>
-               <textarea 
-                 name="description"
-                 value={formData.description}
-                 onChange={handleChange}
-                 rows={4}
-                 required
-                 placeholder="e.g. We are 3rd year CSE students. We study late at night. No smoking inside..."
-                 className="w-full bg-gray-50 border-2 border-black p-4 font-mono text-sm focus:bg-yellow-50 focus:outline-none transition-colors"
-               ></textarea>
+              <label className="font-mono text-xs font-bold block mb-2">DESCRIPTION / RULES</label>
+              <textarea
+                name="description"
+                value={formData.description}
+                onChange={handleChange}
+                rows={4}
+                required
+                placeholder="e.g. We are 3rd year CSE students. We study late at night. No smoking inside..."
+                className="w-full bg-gray-50 border-2 border-black p-4 font-mono text-sm focus:bg-yellow-50 focus:outline-none transition-colors"
+              ></textarea>
             </div>
           </section>
 
           {/* SUBMIT BUTTON */}
           <div className="pt-4 pb-12">
-            <button 
-              type="submit" 
+            <button
+              type="submit"
               disabled={isSubmitting}
               className="w-full bg-black text-white font-black text-2xl py-5 border-2 border-black shadow-[8px_8px_0px_0px_rgba(255,145,77,1)] hover:shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] hover:bg-[#FF914D] hover:text-black transition-all active:translate-y-1 active:shadow-none disabled:opacity-50 disabled:cursor-not-allowed"
             >

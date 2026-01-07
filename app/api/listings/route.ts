@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import prisma from "@/app/lib/prisma";
+import { getCurrentUser } from "@/app/lib/auth"; // from phase 2 (dhruv)
 
 // ============================================================================
 // 1. GET: FETCH ALL LISTINGS (For the Feed)
@@ -35,29 +36,63 @@ export async function GET() {
 // ============================================================================
 // 2. POST: CREATE A NEW LISTING
 // ============================================================================
+
 export async function POST(req: Request) {
+  
   try {
+    const user = {
+      id: "ce8f49ae-149b-4ebe-a0a2-3b9bc5a70211",
+      isVerified: true,
+      isBlacklisted: false,
+    };
+
+
+    // 2. Digital Gatekeeper
+    if (!user.isVerified || user.isBlacklisted) {
+      return NextResponse.json(
+        { error: "User not verified or blacklisted" },
+        { status: 403 }
+      );
+    }
+
     const body = await req.json();
-    
+    console.log("BODY:", body);
+
     // Destructure all incoming data
-    const { 
-      title, 
-      description, 
-      price, 
-      images, 
-      ownerId, // IMPORTANT: Since we don't have Auth yet, frontend must send this!
+    let {
+      title,
+      description,
+      price,
+      images,
       // Tags
-      tag_ac, tag_cooler, tag_noBrokerage, tag_wifi, tag_cook, 
-      tag_maid, tag_geyser, tag_metroNear, tag_noRestrictions 
+      tag_ac, tag_cooler, tag_noBrokerage, tag_wifi, tag_cook,
+      tag_maid, tag_geyser, tag_metroNear, tag_noRestrictions
     } = body;
 
     // 1. Basic Validation
-    if (!title || !description || !price || !ownerId) {
+    if (!title || !description || !price) {
       return NextResponse.json(
-        { error: "Missing required fields (title, desc, price, or owner)" },
+        { error: "Missing required fields (title, desc or price)" },
         { status: 400 }
       );
     }
+
+    title = title.trim();
+    description = description.trim();
+
+    // Ensure price is a number
+    price = Number(price);
+
+    // Ensure images is an array
+    images = Array.isArray(images) ? images : [];
+
+    console.log("Creating listing with:", {
+      title,
+      description,
+      price,
+      images
+    });
+
 
     // 2. Create the Listing in Supabase
     const newListing = await prisma.listing.create({
@@ -66,18 +101,18 @@ export async function POST(req: Request) {
         description,
         price: Number(price), // Ensure it's a number
         images: images || [], // Default to empty array if no images
-        ownerId,
-        
+        ownerId: user.id, // from AUTH
+
         // Map the boolean tags directly
-        tag_ac: tag_ac || false,
-        tag_cooler: tag_cooler || false,
-        tag_noBrokerage: tag_noBrokerage || false,
-        tag_wifi: tag_wifi || false,
-        tag_cook: tag_cook || false,
-        tag_maid: tag_maid || false,
-        tag_geyser: tag_geyser || false,
-        tag_metroNear: tag_metroNear || false,
-        tag_noRestrictions: tag_noRestrictions || false,
+        tag_ac: !!tag_ac,
+        tag_cooler: !!tag_cooler,
+        tag_noBrokerage: !!tag_noBrokerage,
+        tag_wifi: !!tag_wifi,
+        tag_cook: !!tag_cook,
+        tag_maid: !!tag_maid,
+        tag_geyser: !!tag_geyser,
+        tag_metroNear: !!tag_metroNear,
+        tag_noRestrictions: !!tag_noRestrictions,
       },
     });
 
