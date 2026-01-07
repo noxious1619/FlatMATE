@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import prisma from "@/app/lib/prisma";
-import { getCurrentUser } from "@/app/lib/auth"; // from phase 2 (dhruv)
+import { getTestUser } from "@/app/lib/mockAuth"; // from phase 2 (dhruv)
 
 // ============================================================================
 // 1. GET: FETCH ALL LISTINGS (For the Feed)
@@ -40,11 +40,9 @@ export async function GET() {
 export async function POST(req: Request) {
   
   try {
-    const user = {
-      id: "ce8f49ae-149b-4ebe-a0a2-3b9bc5a70211",
-      isVerified: true,
-      isBlacklisted: false,
-    };
+
+    // change later with auth
+    const user = getTestUser();
 
 
     // 2. Digital Gatekeeper
@@ -56,7 +54,6 @@ export async function POST(req: Request) {
     }
 
     const body = await req.json();
-    console.log("BODY:", body);
 
     // Destructure all incoming data
     let {
