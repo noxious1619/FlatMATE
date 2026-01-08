@@ -34,3 +34,16 @@ You can check out [the Next.js GitHub repository](https://github.com/vercel/next
 The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
 
 Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+
+## Project Structure
+
+- **app/**: The core of the application using the App Router.
+  - **layout.tsx**: The root layout that wraps all pages.
+  - **page.tsx**: The main landing page of the application.
+  - **globals.css**: Global CSS styles for the entire project.
+- **components/**: Reusable React components used throughout the application.
+- **lib/**: Utility functions, shared logic, and helper classes.
+- **public/**: Static files such as images, fonts, and icons.
+- **next.config.ts**: Configuration settings for the Next.js framework.
+- **package.json**: Project metadata, scripts, and dependency management.
+- **tsconfig.json**: TypeScript compiler configuration and path aliases.

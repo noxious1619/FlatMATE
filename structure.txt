@@ -1,0 +1,73 @@
+.
+├── .env
+├── .git
+├── .gitignore
+├── README.md
+├── app
+│   ├── (auth)
+│   │   ├── login
+│   │   │   └── page.tsx
+│   │   └── signup
+│   │       └── page.tsx
+│   ├── api
+│   │   ├── auth
+│   │   │   └── [...nextauth]
+│   │   ├── listings
+│   │   │   ├── [id]
+│   │   │   ├── my
+│   │   │   └── route.ts
+│   │   └── register
+│   │       └── route.ts
+│   ├── chat
+│   │   └── [id]
+│   │       └── page.tsx
+│   ├── chats
+│   │   └── page.tsx
+│   ├── components
+│   │   ├── ListingCard.tsx
+│   │   ├── Navbar.tsx
+│   │   └── PoliceTape.tsx
+│   ├── create
+│   │   └── page.tsx
+│   ├── favicon.ico
+│   ├── feed
+│   │   └── page.tsx
+│   ├── globals.css
+│   ├── guidelines
+│   │   └── page.tsx
+│   ├── layout.tsx
+│   ├── lib
+│   │   ├── mockAuth.ts
+│   │   └── prisma.ts
+│   ├── listing
+│   │   └── [id]
+│   │       └── page.tsx
+│   ├── middleware.ts
+│   ├── page.tsx
+│   ├── profile
+│   │   └── page.tsx
+│   ├── saved
+│   │   └── page.tsx
+│   └── verify
+│       └── page.tsx
+├── eslint.config.mjs
+├── next-env.d.ts
+├── next.config.ts
+├── package-lock.json
+├── package.json
+├── postcss.config.mjs
+├── prisma
+│   └── schema
+│       ├── listing.prisma
+│       ├── schema.prisma
+│       └── user.prisma
+├── public
+│   ├── file.svg
+│   ├── globe.svg
+│   ├── next.svg
+│   ├── vercel.svg
+│   └── window.svg
+├── structure.txt
+├── tsconfig.json
+└── types
+    └── next-auth.d.ts

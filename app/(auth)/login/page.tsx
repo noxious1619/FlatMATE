@@ -30,8 +30,9 @@ function LoginForm() {
       } else {
         router.push("/");
       }
-    } catch (err) {
-      setError("Something went wrong");
+    } catch (error) {
+      setError("An unexpected error occurred. Please try again.");
+      console.error("Login error:", error);
     } finally {
       setLoading(false);
     }
@@ -118,9 +119,9 @@ export default function LoginPage() {
         <LoginForm />
 
         <div className="relative flex py-5 items-center">
-          <div className="flex-grow border-t border-gray-300"></div>
-          <span className="flex-shrink mx-4 text-gray-400 font-mono text-xs">OR</span>
-          <div className="flex-grow border-t border-gray-300"></div>
+          <div className="grow border-t border-gray-300"></div>
+          <span className="shrink mx-4 text-gray-400 font-mono text-xs">OR</span>
+          <div className="grow border-t border-gray-300"></div>
         </div>
 
         {/* GOOGLE BUTTON */}
