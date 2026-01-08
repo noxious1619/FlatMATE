@@ -70,6 +70,17 @@ export const authOptions: NextAuthOptions = {
       }
       return token;
     },
+    async signIn({ user, account }) {
+    if (account?.provider === "google") {
+      await prisma.user.update({
+        where: { id: user.id },
+        data: {
+          emailVerified: new Date(),
+        },
+      });
+    }
+    return true;
+  },
   },
 
   pages: {

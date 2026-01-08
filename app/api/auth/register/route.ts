@@ -1,6 +1,8 @@
 import { NextResponse } from "next/server";
 import prisma from "@/app/lib/prisma";
 import bcrypt from "bcryptjs";
+import crypto from "crypto";
+import { sendVerificationEmail } from "@/app/services/email.service";
 
 export async function POST(req: Request) {
     try {
@@ -47,9 +49,30 @@ export async function POST(req: Request) {
         // Exclude passwordHash from response
         const { passwordHash: _, ...userWithoutPassword } = newUser;
 
+
+        //Send Verification Email
+        console.log("Generatring token...");
+        const token = crypto.randomBytes(40).toString("hex");
+        await prisma.verificationToken.create({
+            data: {
+                identifier: email,
+                token,
+                expires: new Date(Date.now() + 24 * 60 * 60 * 1000) // 24 hours expiry
+            }
+        });
+
+        try {
+            console.log("Sending email to:", email);
+            await sendVerificationEmail(email, token);
+            console.log("Email sent successfully");
+        } catch (emailError) {
+            console.error("EMAIL_FAILED:", emailError);
+            // throw new Error("Failed to send verification email");
+        }
+
         return NextResponse.json({ success: true, user: userWithoutPassword }, { status: 201 });
 
-    } catch (error: any) {
+    } catch (error) {
         console.error("Registration Error:", error);
         return NextResponse.json(
             { error: "Internal Server Error" },

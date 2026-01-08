@@ -131,24 +131,27 @@ export default function RegisterPage() {
         return;
       }
 
-      const response = await axios.post("/api/register", {
+      const response = await axios.post("/api/auth/register", {
         ...user,
         college: collegeQuery || user.college,
       });
 
       if (response.status === 201) {
-        // Auto login or redirect
-        const result = await signIn("credentials", {
-          redirect: false,
-          email: user.email,
-          password: user.password,
-        });
+        // Redirect to verification pending page with email param
+        router.push(`/verification-pending?email=${encodeURIComponent(user.email)}`);
+        
+        // // Auto login or redirect
+        // const result = await signIn("credentials", {
+        //   redirect: false,
+        //   email: user.email,
+        //   password: user.password,
+        // });
 
-        if (result?.error) {
-          router.push("/login");
-        } else {
-          router.push("/feed");
-        }
+        // if (result?.error) {
+        //   router.push("/login");
+        // } else {
+        //   router.push("/feed");
+        // }
       }
     } catch (err: any) {
       console.error(err);
@@ -320,9 +323,9 @@ export default function RegisterPage() {
           </button>
 
           <div className="relative flex py-2 items-center">
-            <div className="flex-grow border-t border-gray-300"></div>
-            <span className="flex-shrink mx-4 text-gray-400 font-mono text-xs">OR</span>
-            <div className="flex-grow border-t border-gray-300"></div>
+            <div className="grow border-t border-gray-300"></div>
+            <span className="shrink mx-4 text-gray-400 font-mono text-xs">OR</span>
+            <div className="grow border-t border-gray-300"></div>
           </div>
 
           {/* GOOGLE BUTTON */}
