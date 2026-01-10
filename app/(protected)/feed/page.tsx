@@ -46,6 +46,8 @@ export default async function FeedPage(props: FeedPageProps) {
     orderBy: { createdAt: "desc" },
   });
 
+  // console.log("rawListings:", rawListings);
+
   const buttonClass = (active: boolean) =>
     active
       ? "bg-black text-white border-2 border-black px-4 py-2 font-mono text-sm font-bold whitespace-nowrap"
@@ -95,9 +97,10 @@ export default async function FeedPage(props: FeedPageProps) {
             {rawListings.map((listing) => (
               <ListingCard
                 key={listing.id}
+                title={listing.title}
                 id={listing.id}
                 rent={listing.price.toLocaleString("en-IN")}
-                location={listing.title}
+                location={listing.address}
                 category={listing.category}
                 tags={[]}
                 imageUrl={listing.images[0] || "fallback_url"}

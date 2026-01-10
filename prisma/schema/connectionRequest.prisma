@@ -1,0 +1,20 @@
+model ConnectionRequest {
+  id        String   @id @default(uuid())
+  status    String   @default("PENDING") // Options: "PENDING", "ACCEPTED", "REJECTED"
+  message   String?  // Optional message from sender
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // RELATIONS
+  
+  senderId  String
+  sender    User     @relation("SentRequests", fields: [senderId], references: [id], onDelete: Cascade)
+
+  receiverId String
+  receiver   User     @relation("ReceivedRequests", fields: [receiverId], references: [id], onDelete: Cascade)
+
+  listingId String
+  listing   Listing  @relation(fields: [listingId], references: [id], onDelete: Cascade)
+
+  @@unique([senderId, listingId])
+}

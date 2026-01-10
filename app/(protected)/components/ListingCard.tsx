@@ -4,6 +4,7 @@ import Link from "next/link";
 // Define what a listing looks like
 interface ListingProps {
   id: string;
+  title: string;
   rent: string;
   location: string;
   category: "BOYS" | "GIRLS" | "Any";
@@ -11,7 +12,7 @@ interface ListingProps {
   imageUrl: string;
 }
 
-export default function ListingCard({ rent, location, category, tags, imageUrl, id }: ListingProps) {
+export default function ListingCard({ rent, location, category, tags, imageUrl, id, title }: ListingProps) {
   return (
     <Link href={`/listing/${id}`}>  {/* Wrap everything in Link */}
     <div className="retro-card group cursor-pointer relative flex flex-col h-full">
@@ -42,20 +43,25 @@ export default function ListingCard({ rent, location, category, tags, imageUrl, 
                 <h3 className="font-heavy text-xl leading-none mb-1 flex items-center gap-1">
                     <IndianRupee size={18} strokeWidth={3} /> {rent}
                 </h3>
-                <p className="font-mono text-xs text-gray-500 flex items-center gap-1">
-                    <MapPin size={12} /> {location}
+                <p className="font-heavy fw-200 text-xs text-black-100 flex items-center gap-1 mt-1">
+                    {/* <MapPin size={12}/>  */}
+                    {title}
+                </p>
+                <p className="font-mono text-xs text-gray-500 flex items-center gap-1 mt-1">
+                    <MapPin size={12}/> 
+                    {location}
                 </p>
             </div>
         </div>
 
         {/* Vibe Tags (The Pill Badges) */}
-        <div className="flex flex-wrap gap-2 mt-2 mb-4">
+        {/* <div className="flex flex-wrap gap-2 mt-2 mb-4">
             {tags.map((tag, index) => (
                 <span key={index} className="px-2 py-1 text-[10px] font-mono font-bold border border-black bg-brand-bg rounded-full">
                     {tag}
                 </span>
             ))}
-        </div>
+        </div> */}
 
         {/* Action Button (Pushed to bottom) */}
         <div className="mt-auto">

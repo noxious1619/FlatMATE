@@ -62,7 +62,7 @@ export async function PATCH(
         description: body.description,
         price: Number(body.price),
         deposit: Number(body.deposit),
-        address: body.address, // mapping location to address if that's the schema field
+        address: body.address,
         // tags
         tag_ac: body.tag_ac,
         tag_cooler: body.tag_cooler,

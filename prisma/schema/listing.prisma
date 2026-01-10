@@ -22,6 +22,7 @@ model Listing {
   deposit            Int?
   owner              User           @relation(fields: [ownerId], references: [id], onDelete: Cascade)
   savedByUsers       SavedListing[]
+  connectionRequests ConnectionRequest[]
 }
 
 model SavedListing {

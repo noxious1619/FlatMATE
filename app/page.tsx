@@ -1,6 +1,7 @@
 import Link from "next/link";
 import Navbar from "./components/Navbar";
 import PoliceTape from "./components/PoliceTape";
+import Footer from "./components/Footer";
 
 export default function Home() {
   return (
@@ -8,8 +9,8 @@ export default function Home() {
       <Navbar />
 
       {/* HERO SECTION */}
-      <div className="relative pt-20 pb-32 text-center px-4">
-
+      <div className="relative pt-30 pb-10 text-center px-4">
+        
         <PoliceTape />
 
         <div className="relative z-10 mt-40 max-w-4xl mx-auto">
@@ -25,11 +26,11 @@ export default function Home() {
 
           <br />
 
-           <Link href="/signup">
-            <button className="font-heavy text-2xl px-10 py-5 bg-black text-white border-2 border-black hover:bg-white hover:text-black transition-all shadow-retro hover:shadow-retro-hover active:translate-x-[2px] active:translate-y-[2px] active:shadow-retro-active">
-              GET VERIFIED &rarr;
-            </button>
-          </Link>
+          <button className="font-heavy text-2xl px-10 py-5 bg-black text-white border-2 border-black hover:bg-white hover:text-black transition-all shadow-retro hover:shadow-retro-hover active:translate-x-[2px] active:translate-y-[2px] active:shadow-retro-active">
+            GET VERIFIED &rarr;
+          </button>
+
+          <Footer />
         </div>
       </div>
     </main>

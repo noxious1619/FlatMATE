@@ -17,7 +17,7 @@ export default function CreateListing() {
     rent: "",
     deposit: "",
     location: "",
-    category: "ANYONE",
+    category: "",
     description: ""
   });
 
@@ -85,7 +85,9 @@ export default function CreateListing() {
     const payload = {
       title: formData.title,
       category: formData.category,
-      description: `${formData.description}\n\n📍 Location: ${formData.location}\n👤 Preference: ${formData.category}`,
+      description: `${formData.description}`,
+      address: formData.location,
+      Preference: formData.category,
       price: Number(formData.rent),
       deposit: Number(formData.deposit) || 0,
       images: imageUrls,
@@ -100,6 +102,8 @@ export default function CreateListing() {
       tag_noRestrictions: selectedTags.includes("No Restrictions"),
     };
 
+    console.log("Submitting payload:", payload);
+    
     const res = await fetch("/api/listings", {
       method: "POST",
       headers: { "Content-Type": "application/json" },

@@ -22,7 +22,9 @@ type UserProfile = {
   email: string | null;
   image: string | null;
   college: string | null;
-  isVerified?: boolean; // mapped from emailVerified in some logic, or just use boolean logic
+  isVerified?: boolean;
+  phoneNumber?: string;
+  // mapped from emailVerified in some logic, or just use boolean logic
   // we will interpret emailVerified or isVerified from backend
   // For now, let's assume valid user is verified if they have isVerified flag from API or we check emailVerified
   emailVerified: string | null;
