@@ -25,11 +25,11 @@ export default function Home() {
           </p>
 
           <br />
-
+          <Link href="/signup">
           <button className="font-heavy text-2xl px-10 py-5 bg-black text-white border-2 border-black hover:bg-white hover:text-black transition-all shadow-retro hover:shadow-retro-hover active:translate-x-[2px] active:translate-y-[2px] active:shadow-retro-active">
             GET VERIFIED &rarr;
           </button>
-
+          </Link>
           <Footer />
         </div>
       </div>
