@@ -3,6 +3,8 @@ import { Archivo_Black, Space_Mono } from "next/font/google";
 import "./globals.css";
 import Providers from "./provider";
 import ClientToaster from "./components/ClientToaster";
+import "leaflet/dist/leaflet.css";
+
 
 // 1. Configure the Retro Fonts
 const archivo = Archivo_Black({ 

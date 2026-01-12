@@ -3,59 +3,72 @@ import prisma from "@/app/lib/prisma";
 import { getServerSession } from "next-auth";
 import { authOptions } from "../auth/[...nextauth]/options";
 
-// 1. GET: FETCH ALL LISTINGS (For the Feed)
+/*  GET: FETCH LISTINGS (FEED)*/
 export async function GET() {
   try {
     const listings = await prisma.listing.findMany({
       where: {
-        isAvailable: true, // Only show available flats
+        isAvailable: true,
       },
       orderBy: {
-        createdAt: 'desc', // Newest first
+        createdAt: "desc",
       },
       include: {
-        owner: { // Join with User table to get owner details
+        location: true,
+        college: {
           select: {
+            id: true,
+            name: true,
+          },
+        },
+        owner: {
+          select: {
+            id: true,
             name: true,
             image: true,
-            college: true,
             emailVerified: true,
-          }
-        }
-      }
+          },
+        },
+      },
     });
 
     return NextResponse.json(listings);
   } catch (error) {
     console.error("Error fetching listings:", error);
-    return NextResponse.json({ error: "Failed to load feed" }, { status: 500 });
+    return NextResponse.json(
+      { error: "Failed to load feed" },
+      { status: 500 }
+    );
   }
 }
 
-// 2. POST: CREATE A NEW LISTING
+/* =========================
+   POST: CREATE LISTING
+========================= */
 export async function POST(req: Request) {
-
   try {
     const session = await getServerSession(authOptions);
 
-    if (!session || !session.user || !session.user.id) {
+    if (!session?.user?.id) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    // Fetch user checks
+    /* ---------- USER CHECKS ---------- */
     const user = await prisma.user.findUnique({
       where: { id: session.user.id },
-      select: { emailVerified: true, isBlacklisted: true }
+      select: {
+        emailVerified: true,
+        isBlacklisted: true,
+      },
     });
 
     if (!user) {
       return NextResponse.json({ error: "User not found" }, { status: 404 });
     }
 
-    // 2. Digital Gatekeeper
     if (!user.emailVerified) {
       return NextResponse.json(
-        { error: "Email not verified. Please verify your email to create listings." },
+        { error: "Email not verified" },
         { status: 403 }
       );
     }
@@ -67,69 +80,95 @@ export async function POST(req: Request) {
       );
     }
 
+    /* ---------- BODY ---------- */
     const body = await req.json();
 
-    // Destructure all incoming data
-    let {
+    const {
       title,
       description,
       price,
-      images,
+      deposit,
       category,
-      address, // Ensure address is captured
-      college,
+      genderPreference,
+      collegeId,
+      location,
+      images,
+
       // Tags
-      tag_ac, tag_cooler, tag_noBrokerage, tag_wifi, tag_cook,
-      tag_maid, tag_geyser, tag_metroNear, tag_noRestrictions
+      tag_ac,
+      tag_cooler,
+      tag_noBrokerage,
+      tag_wifi,
+      tag_cook,
+      tag_maid,
+      tag_geyser,
+      tag_metroNear,
+      tag_noRestrictions,
     } = body;
 
-    // 1. Basic Validation
-    if (!title || !description || !price) {
+    /* ---------- VALIDATION ---------- */
+    if (
+      !title ||
+      !description ||
+      !price ||
+      !location?.latitude ||
+      !location?.longitude
+    ) {
       return NextResponse.json(
-        { error: "Missing required fields (title, desc or price)" },
+        { error: "Missing required fields" },
         { status: 400 }
       );
     }
 
-    title = title.trim();
-    description = description.trim();
+    /* ---------- CREATE (TRANSACTION) ---------- */
+    const listing = await prisma.$transaction(async (tx) => {
+      const createdLocation = await tx.location.create({
+        data: {
+          latitude: Number(location.latitude),
+          longitude: Number(location.longitude),
+          displayAddress: location.displayAddress,
+        },
+      });
 
-    // Ensure price is a number
-    price = Number(price);
+      return tx.listing.create({
+        data: {
+          title: title.trim(),
+          description: description.trim(),
 
-    // Ensure images is an array
-    images = Array.isArray(images) ? images : [];
+          price: Number(price),
+          deposit: deposit ? Number(deposit) : null,
 
-    // 2. Create the Listing
-    const newListing = await prisma.listing.create({
-      data: {
-        title,
-        description,
-        price: Number(price), // Ensure it's a number
-        images: images || [], // Default to empty array if no images
-        ownerId: session.user.id,
-        category,
-        address: address || "",
-        isAvailable: true,
-        college: college || "",
+          category,
+          genderPreference,
 
-        // Map the boolean tags directly
-        tag_ac: !!tag_ac,
-        tag_cooler: !!tag_cooler,
-        tag_noBrokerage: !!tag_noBrokerage,
-        tag_wifi: !!tag_wifi,
-        tag_cook: !!tag_cook,
-        tag_maid: !!tag_maid,
-        tag_geyser: !!tag_geyser,
-        tag_metroNear: !!tag_metroNear,
-        tag_noRestrictions: !!tag_noRestrictions,
-      },
+          images: Array.isArray(images) ? images : [],
+
+          ownerId: session.user.id,
+          locationId: createdLocation.id,
+          collegeId: collegeId || null,
+
+          isAvailable: true,
+
+          // Tags
+          tag_ac: !!tag_ac,
+          tag_cooler: !!tag_cooler,
+          tag_noBrokerage: !!tag_noBrokerage,
+          tag_wifi: !!tag_wifi,
+          tag_cook: !!tag_cook,
+          tag_maid: !!tag_maid,
+          tag_geyser: !!tag_geyser,
+          tag_metroNear: !!tag_metroNear,
+          tag_noRestrictions: !!tag_noRestrictions,
+        },
+      });
     });
 
-    return NextResponse.json(newListing, { status: 201 });
-
+    return NextResponse.json(listing, { status: 201 });
   } catch (error) {
     console.error("Error creating listing:", error);
-    return NextResponse.json({ error: "Failed to create listing" }, { status: 500 });
+    return NextResponse.json(
+      { error: "Failed to create listing" },
+      { status: 500 }
+    );
   }
 }

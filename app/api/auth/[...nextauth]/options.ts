@@ -69,12 +69,27 @@ export const authOptions: NextAuthOptions = {
     }
     ,
     async jwt({ token, user }) {
+      // Sync user data TTL
+      const now = Date.now();
+      if (!token.last_synced || now - token.last_synced > 5 * 60 * 1000) { // 5 minutes
+      const dbUser = await prisma.user.findUnique({
+        where: { id: token.sub! },
+        select: { isBlacklisted: true, role: true, emailVerified: true },
+      });
+      if (dbUser) {
+        token.isBlacklisted = dbUser.isBlacklisted;
+        token.role = dbUser.role;
+        token.emailVerified = dbUser.emailVerified ? dbUser.emailVerified.toISOString() : null;
+      }
+      token.last_synced = now;
+    }
       // On first login
       if (user) {
         token.sub = user.id;
         token.role= user.role? user.role : "USER";
         token.emailVerified= user.emailVerified? user.emailVerified : null;
         token.role = user.role ? user.role : "USER";
+        token.last_synced = now;
 
         // Fetch blacklist status
         const dbUser = await prisma.user.findUnique({

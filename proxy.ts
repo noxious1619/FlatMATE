@@ -18,7 +18,7 @@ export default withAuth(
     if (token && isAuthPage) {
       return NextResponse.redirect(new URL("/feed", req.url));
     }
-    console.log("Token:", token);
+    
     // Not Allow - Unverified users
     if (
       token &&

@@ -2,142 +2,65 @@
 
 import Navbar from "@/app/components/Navbar";
 import { Camera, IndianRupee, MapPin, Check, Type } from "lucide-react";
-import { useState } from "react";
+import { useRef, useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import toast from "react-hot-toast";
+import { searchAddress } from "@/app/helper/searchAddress";
+import dynamic from "next/dynamic";
 
-const DELHI_COLLEGES = [
-  // --- TECHNICAL & MAJOR UNIVERSITIES ---
-  "Delhi Technological University (DTU)",
-  "Netaji Subhas University of Technology (NSUT)",
-  "Indraprastha Institute of Information Technology Delhi (IIIT-D)",
-  "Indira Gandhi Delhi Technical University for Women (IGDTUW)",
-  "Jawaharlal Nehru University (JNU)",
-  "Jamia Millia Islamia (JMI)",
-  "Indian Institute of Technology Delhi (IIT Delhi)",
-  "National Law University, Delhi (NLU)",
-  "Dr. B.R. Ambedkar University Delhi (AUD)",
-  "Guru Gobind Singh Indraprastha University (USS - Main Campus)",
+const LocationMap = dynamic(
+  () => import("@/app/(protected)/components/locationMap"),
+  { ssr: false }
+);
 
-  // --- GGSIPU (IP UNIVERSITY) AFFILIATED ---
-  "Maharaja Agrasen Institute of Technology (MAIT)",
-  "Maharaja Surajmal Institute of Technology (MSIT)",
-  "University School of Information, Communication and Technology (USICT)",
-  "Bhagwan Parshuram Institute of Technology (BPIT)",
-  "Bharati Vidyapeeth's College of Engineering (BVCOE)",
-  "Vivekananda Institute of Professional Studies (VIPS)",
-  "Guru Tegh Bahadur Institute of Technology (GTBIT)",
-  "Dr. Akhilesh Das Gupta Institute of Technology & Management (ADGITM)",
-  "Jagan Institute of Management Studies (JIMS) - Rohini",
-  "Jagan Institute of Management Studies (JIMS) - Vasant Kunj",
-  "Trinity Institute of Professional Studies (TIPS)",
-  "Maharaja Agrasen Institute of Management Studies (MAIMS)",
-  "Delhi Institute of Advanced Studies (DIAS)",
-  "Ideal Institute of Management and Technology (IIMT)",
-  "Institute of Information Technology & Management (IITM) - Janakpuri",
-  "HMR Institute of Technology & Management",
-  "Guru Nanak Institute of Management",
-  "Tecnia Institute of Advanced Studies",
-  "Gitarattan International Business School (GIBS)",
-  "Banarsidas Chandiwala Institute of Hotel Management",
-  "Delhi Technical Campus (DTC) - Greater Noida",
-  "Vardhman Mahavir Medical College (VMMC)",
 
-  // --- DELHI UNIVERSITY (DU) - NORTH CAMPUS ---
-  "St. Stephen's College",
-  "Shri Ram College of Commerce (SRCC)",
-  "Hindu College",
-  "Hansraj College",
-  "Kirori Mal College (KMC)",
-  "Miranda House",
-  "Ramjas College",
-  "Daulat Ram College",
-  "Indraprastha College for Women (IP College)",
-  "SGTB Khalsa College",
-  "Shaheed Sukhdev College of Business Studies (SSCBS)",
-
-  // --- DELHI UNIVERSITY (DU) - SOUTH CAMPUS & OTHERS ---
-  "Lady Shri Ram College for Women (LSR)",
-  "Sri Venkateswara College (Venky)",
-  "Jesus and Mary College (JMC)",
-  "Gargi College",
-  "Kamala Nehru College (KNC)",
-  "Delhi College of Arts and Commerce (DCAC)",
-  "Atma Ram Sanatan Dharma College (ARSD)",
-  "Maitreyi College",
-  "Motilal Nehru College",
-  "Ram Lal Anand College",
-  "Aryabhatta College",
-  "College of Vocational Studies (CVS)",
-  "Deshbandhu College",
-  "Acharya Narendra Dev College (ANDC)",
-  "Ramanujan College",
-  "P.G.D.A.V. College",
-
-  // --- DELHI UNIVERSITY (DU) - OFF CAMPUS ---
-  "Deen Dayal Upadhyaya College (DDU)",
-  "Keshav Mahavidyalaya",
-  "Maharaja Agrasen College (DU)",
-  "Shaheed Bhagat Singh College",
-  "Shivaji College",
-  "Rajdhani College",
-  "Lakshmibai College",
-  "Satyawati College",
-  "Shyam Lal College",
-  "Vivekananda College",
-  "Kalindi College",
-  "Janki Devi Memorial College",
-  "Mata Sundri College",
-  "Zakir Husain Delhi College",
-  "Sri Guru Gobind Singh College of Commerce (SGGSCC)",
-  "Sri Guru Nanak Dev Khalsa College",
-
-  // --- MEDICAL & OTHERS ---
-  "All India Institute of Medical Sciences (AIIMS)",
-  "Maulana Azad Medical College (MAMC)",
-  "Lady Hardinge Medical College (LHMC)",
-  "University College of Medical Sciences (UCMS)",
-  "School of Planning and Architecture (SPA)",
-  "National Institute of Fashion Technology (NIFT) - Delhi",
-  "Institute of Home Economics",
-];
 
 export default function CreateListing() {
   const router = useRouter();
+  const debounceRef = useRef<NodeJS.Timeout | null>(null);
+
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [suggestions, setSuggestions] = useState<any[]>([]);
+  const [images, setImages] = useState<File[]>([]);
+  const [selectedTags, setSelectedTags] = useState<string[]>([]);
+
+  const DEFAULT_LAT = 28.6139;
+  const DEFAULT_LNG = 77.2090;
+
+  const [colleges, setColleges] = useState<any[]>([]);
+
+  useEffect(() => {
+    fetch("/api/colleges")
+      .then(res => res.json())
+      .then(setColleges);
+  }, []);
+
 
   // 1. FORM STATE
   const [formData, setFormData] = useState({
     title: "",
     rent: "",
     deposit: "",
-    location: "",
-    college: "",
-    category: "",
-    description: ""
+    description: "",
+
+    category: "ROOM",
+    genderPreference: "ANY",
+
+    location: {
+      latitude: DEFAULT_LAT,
+      longitude: DEFAULT_LNG,
+      displayAddress: "",
+    },
+
+    collegeId: "",
   });
 
-  const [images, setImages] = useState<File[]>([]);
 
-  const [selectedTags, setSelectedTags] = useState<string[]>([]);
+
 
   const TAGS = ["AC", "Cooler", "No Brokerage", "Wifi", "Cook", "Maid", "Geyser", "Metro Near", "No Restrictions"];
 
-  // 2. HANDLE INPUT CHANGES
-  const handleChange = (e: any) => {
-    const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
-  };
-
-  const toggleTag = (tag: string) => {
-    if (selectedTags.includes(tag)) {
-      setSelectedTags(selectedTags.filter(t => t !== tag));
-    } else {
-      setSelectedTags([...selectedTags, tag]);
-    }
-  };
-
-  // 4. IMAGE UPLOAD TO CLOUDINARY
+  // IMAGE UPLOAD TO CLOUDINARY
   const handleImageUpload = async (file: File) => {
     const formData = new FormData();
     formData.append("file", file);
@@ -167,7 +90,23 @@ export default function CreateListing() {
   };
 
 
-  // 3. SUBMIT TO API
+  // 2. HANDLE INPUT CHANGES
+  const handleChange = (e: any) => {
+    const { name, value } = e.target;
+    setFormData(prev => ({ ...prev, [name]: value }));
+  };
+
+  const toggleTag = (tag: string) => {
+    if (selectedTags.includes(tag)) {
+      setSelectedTags(selectedTags.filter(t => t !== tag));
+    } else {
+      setSelectedTags([...selectedTags, tag]);
+    }
+  };
+
+
+
+  // SUBMIT TO API
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
@@ -178,16 +117,27 @@ export default function CreateListing() {
         images.map((file) => handleImageUpload(file))
       );
 
+      // Prepare payload
       const payload = {
-        title: formData.title,
+        title: formData.title.trim(),
+        description: formData.description.trim(),
+
         category: formData.category,
-        description: `${formData.description}`,
-        address: formData.location,
-        college: formData.college,
-        Preference: formData.category,
+        genderPreference: formData.genderPreference,
+
         price: Number(formData.rent),
-        deposit: Number(formData.deposit) || 0,
+        deposit: Number(formData.deposit) || null,
+
+        collegeId: formData.collegeId || null,
+
+        location: {
+          latitude: formData.location.latitude,
+          longitude: formData.location.longitude,
+          displayAddress: formData.location.displayAddress,
+        },
+
         images: imageUrls,
+
         tag_ac: selectedTags.includes("AC"),
         tag_cooler: selectedTags.includes("Cooler"),
         tag_noBrokerage: selectedTags.includes("No Brokerage"),
@@ -299,28 +249,112 @@ export default function CreateListing() {
                 </div>
               </div>
 
+
               {/* LOCATION */}
               <div className="md:col-span-2">
-                <label className="font-mono text-xs font-bold block mb-2">EXACT LOCATION</label>
-                <div className="relative">
-                  <MapPin className="absolute left-3 top-3 text-gray-400" size={20} />
-                  <select
-                    name="location"
-                    value={formData.location}
-                    onChange={handleChange}
-                    className="w-full bg-gray-50 border-2 border-black pl-10 p-3 font-mono focus:bg-yellow-50 focus:outline-none appearance-none cursor-pointer"
-                  >
-                    <option value="">Select Area...</option>
-                    <option value="Sector 22 - Pocket 4">Sector 22 - Pocket 4</option>
-                    <option value="Sector 22 - Pocket 2">Sector 22 - Pocket 2</option>
-                    <option value="Sector 24">Sector 24</option>
-                    <option value="Sector 25">Sector 25</option>
-                    <option value="Begampur">Begampur</option>
-                  </select>
+                <div className="md:col-span-2">
+                  <label className="font-mono text-xs font-bold block mb-2">
+                    EXACT LOCATION
+                  </label>
+
+                  <div className="relative">
+                    <MapPin className="absolute left-3 top-3 text-gray-400" size={20} />
+                    <input
+                      type="text"
+                      placeholder="Search & pin exact location"
+                      value={formData.location.displayAddress}
+
+                      onChange={(e) => {
+
+                        setSuggestions([]);
+
+                        const value = e.target.value;
+
+                        setFormData((prev) => ({
+                          ...prev,
+                          location: {
+                            ...prev.location,
+                            displayAddress: value,
+                          },
+                        }));
+
+                        if (debounceRef.current) clearTimeout(debounceRef.current);
+                        if (value.length < 3) {
+                          return;
+                        }
+
+                        debounceRef.current = setTimeout(async () => {
+                          const res = await searchAddress(value);
+                          if (Array.isArray(res)) {
+                            setSuggestions(res);
+                          }
+                        }, 500);
+
+                      }}
+                      required
+                      className="w-full bg-gray-50 border-2 border-black pl-10 p-3 font-mono"
+                    />
+
+                    {/* AUTOSUGGEST DROPDOWN */}
+                    {suggestions.length > 0 && (
+                      <div className="absolute left-0 top-full z-5000 w-full bg-white border-2 border-black mt-1 max-h-60 overflow-auto">
+                        {suggestions.map((s) => (
+                          <button
+                            type="button"
+                            key={s.place_id}
+                            onMouseDown={(e) => {
+                              e.preventDefault(); // Prevent input blur
+                              setFormData((prev) => ({
+                                ...prev,
+                                location: {
+                                  latitude: Number(s.lat),
+                                  longitude: Number(s.lon),
+                                  displayAddress: s.display_name,
+                                },
+                              }));
+                              setSuggestions([]);
+                            }}
+                            className="block w-full text-left px-3 py-2 hover:bg-gray-100 font-mono text-xs"
+                          >
+                            {s.display_name}
+                          </button>
+                        ))}
+                      </div>
+                    )}
+
+                  </div>
+
+                  {/* MAP */}
+                  <div className="mt-4">
+                    <LocationMap
+                      lat={formData.location.latitude}
+                      lng={formData.location.longitude}
+                      onChange={(lat, lng) =>
+                        setFormData((prev) => ({
+                          ...prev,
+                          location: {
+                            ...prev.location,
+                            latitude: lat,
+                            longitude: lng,
+                          },
+                        }))
+                      }
+                    />
+                    <p className="font-mono text-xs text-gray-500 mt-2">
+                      Click or drag the pin to fine-tune the location
+                    </p>
+                  </div>
+
+
                 </div>
+
               </div>
 
 
+
+
+
+              {/* COLLEGE */}
               <div className="md:col-span-2">
                 <label className="font-mono text-xs font-bold block mb-2">
                   NEARBY COLLEGE
@@ -330,42 +364,53 @@ export default function CreateListing() {
                   <MapPin className="absolute left-3 top-3 text-gray-400" size={20} />
 
                   <select
-                    name="college"
-                    value={formData.college}
-                    onChange={handleChange}
+                    value={formData.collegeId}
+                    onChange={(e) =>
+                      setFormData((prev) => ({
+                        ...prev,
+                        collegeId: e.target.value
+                      }))
+                    }
                     className="w-full bg-gray-50 border-2 border-black pl-10 p-3 font-mono focus:bg-yellow-50 focus:outline-none appearance-none cursor-pointer"
                   >
                     <option value="">Select College...</option>
-
-                    {DELHI_COLLEGES.map((college) => (
-                      <option key={college} value={college}>
-                        {college}
+                    {colleges.map((c) => (
+                      <option key={c.id} value={c.id}>
+                        {c.name}
                       </option>
                     ))}
                   </select>
+
                 </div>
               </div>
+
 
 
               {/* GENDER PREFERENCE */}
               <div className="md:col-span-2">
                 <label className="font-mono text-xs font-bold block mb-2">WHO ARE YOU LOOKING FOR?</label>
                 <div className="grid grid-cols-3 gap-4">
-                  {["BOYS", "GIRLS", "ANYONE"].map((g) => (
+                  {["MALE", "FEMALE", "ANY"].map((g) => (
                     <label key={g} className="cursor-pointer">
                       <input
                         type="radio"
-                        name="category"
+                        name="genderPreference"
                         value={g}
-                        checked={formData.category === g}
-                        onChange={handleChange}
+                        checked={formData.genderPreference === g}
+                        onChange={(e) =>
+                          setFormData((prev) => ({
+                            ...prev,
+                            genderPreference: e.target.value,
+                          }))
+                        }
                         className="peer sr-only"
                       />
                       <div className="text-center py-3 border-2 border-black font-black text-sm hover:bg-gray-100 peer-checked:bg-black peer-checked:text-white transition-all">
-                        {g}
+                        {g === "MALE" ? "BOYS" : g === "FEMALE" ? "GIRLS" : "ANYONE"}
                       </div>
                     </label>
                   ))}
+
                 </div>
               </div>
             </div>
