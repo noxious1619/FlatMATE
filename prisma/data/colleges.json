@@ -1,27 +1,59 @@
 [
-  {
-    "name": "Maharaja Agrasen Institute of Technology",
-    "city": "Delhi",
-    "state": "Delhi"
-  },
-  {
-    "name": "Maharaja Surajmal Institute of Technology",
-    "city": "Delhi",
-    "state": "Delhi"
-  },
-  {
-    "name": "Indian Institute of Technology Delhi",
-    "city": "Delhi",
-    "state": "Delhi"
-  },
-  {
-    "name": "Netaji Subhas University of Technology",
-    "city": "Delhi",
-    "state": "Delhi"
-  },
-  {
-    "name": "Delhi Technological University",
-    "city": "Delhi",
-    "state": "Delhi"
-  }
+  { "name": "Delhi Technological University", "city": "Delhi", "state": "Delhi" },
+  { "name": "Indraprastha Institute of Information Technology Delhi", "city": "Delhi", "state": "Delhi" },
+  { "name": "Indira Gandhi Delhi Technical University for Women", "city": "Delhi", "state": "Delhi" },
+  { "name": "National Law University Delhi", "city": "Delhi", "state": "Delhi" },
+  { "name": "Ambedkar University Delhi", "city": "Delhi", "state": "Delhi" },
+  { "name": "Guru Gobind Singh Indraprastha University", "city": "Delhi", "state": "Delhi" },
+
+  { "name": "Amity Institute of Education Saket", "city": "Delhi", "state": "Delhi" },
+  { "name": "Amity School of Engineering and Technology Bijwasan", "city": "Delhi", "state": "Delhi" },
+  { "name": "Army College of Medical Sciences", "city": "Delhi", "state": "Delhi" },
+  { "name": "Banarsidas Chandiwala Institute of Hotel Management and Catering Technology", "city": "Delhi", "state": "Delhi" },
+  { "name": "Banarsidas Chandiwala Institute of Information Technology", "city": "Delhi", "state": "Delhi" },
+  { "name": "Banarsidas Chandiwala Institute of Physiotherapy", "city": "Delhi", "state": "Delhi" },
+  { "name": "Banarsidas Chandiwala Institute of Professional Studies", "city": "Delhi", "state": "Delhi" },
+  { "name": "Bhagwan Parshuram Institute of Technology", "city": "Delhi", "state": "Delhi" },
+  { "name": "Bharati Vidyapeeth's College of Engineering", "city": "Delhi", "state": "Delhi" },
+  { "name": "Bharati Vidyapeeth Institute of Computer Applications and Management", "city": "Delhi", "state": "Delhi" },
+  { "name": "Chanderprabhu Jain College of Higher Studies and School of Law", "city": "Delhi", "state": "Delhi" },
+  { "name": "COMM-IT Career Academy", "city": "Delhi", "state": "Delhi" },
+  { "name": "Delhi School of Professional Studies and Research", "city": "Delhi", "state": "Delhi" },
+  { "name": "Delhi Institute of Advanced Studies", "city": "Delhi", "state": "Delhi" },
+  { "name": "Delhi Institute of Rural Development Holambi Khurd", "city": "Delhi", "state": "Delhi" },
+  { "name": "Delhi Institute of Rural Development Nangli Puna", "city": "Delhi", "state": "Delhi" },
+  { "name": "Fairfield Institute of Management and Technology", "city": "Delhi", "state": "Delhi" },
+  { "name": "Gitarattan Institute of Advanced Studies and Training", "city": "Delhi", "state": "Delhi" },
+  { "name": "Gitarattan International Business School", "city": "Delhi", "state": "Delhi" },
+  { "name": "Guru Nanak Institute of Management", "city": "Delhi", "state": "Delhi" },
+  { "name": "Guru Teg Bahadur Institute of Technology", "city": "Delhi", "state": "Delhi" },
+  { "name": "HMR Institute of Technology and Management", "city": "Delhi", "state": "Delhi" },
+  { "name": "Ideal Institute of Management and Technology", "city": "Delhi", "state": "Delhi" },
+  { "name": "Institute of Information Technology and Management Janakpuri", "city": "Delhi", "state": "Delhi" },
+  { "name": "Institute of Innovation in Technology and Management", "city": "Delhi", "state": "Delhi" },
+  { "name": "Jagan Institute of Management Studies", "city": "Delhi", "state": "Delhi" },
+  { "name": "Jagannath International Management School Vasant Kunj", "city": "Delhi", "state": "Delhi" },
+  { "name": "Kalka Institute for Research and Advanced Studies", "city": "Delhi", "state": "Delhi" },
+  { "name": "Kasturi Ram College of Higher Education", "city": "Delhi", "state": "Delhi" },
+  { "name": "Kamal Institute of Higher Education and Advance Technology", "city": "Delhi", "state": "Delhi" },
+  { "name": "Lal Bahadur Shastri Institute of Management", "city": "Delhi", "state": "Delhi" },
+  { "name": "Lingaya's Lalita Devi Institute of Management Science", "city": "Delhi", "state": "Delhi" },
+  { "name": "Maharaja Agrasen Institute of Management Studies", "city": "Delhi", "state": "Delhi" },
+  { "name": "Maharaja Agrasen Institute of Technology", "city": "Delhi", "state": "Delhi" },
+  { "name": "Maharaja Surajmal Institute", "city": "Delhi", "state": "Delhi" },
+  { "name": "Maharaja Surajmal Institute of Technology", "city": "Delhi", "state": "Delhi" },
+  { "name": "Management Education and Research Institute", "city": "Delhi", "state": "Delhi" },
+  { "name": "New Delhi Institute of Management", "city": "Delhi", "state": "Delhi" },
+  { "name": "Northern India Engineering College", "city": "Delhi", "state": "Delhi" },
+  { "name": "Rukmini Devi Institute of Advanced Studies", "city": "Delhi", "state": "Delhi" },
+  { "name": "Vivekananda Institute of Professional Studies", "city": "Delhi", "state": "Delhi" },
+
+  { "name": "University of Delhi", "city": "Delhi", "state": "Delhi" },
+  { "name": "Jamia Millia Islamia", "city": "Delhi", "state": "Delhi" },
+  { "name": "Jawaharlal Nehru University", "city": "Delhi", "state": "Delhi" },
+  { "name": "Indian Institute of Technology Delhi", "city": "Delhi", "state": "Delhi" },
+  { "name": "All India Institute of Medical Sciences Delhi", "city": "Delhi", "state": "Delhi" },
+  { "name": "Indira Gandhi National Open University", "city": "Delhi", "state": "Delhi" },
+  { "name": "National Institute of Fashion Technology Delhi", "city": "Delhi", "state": "Delhi" },
+  { "name": "Indian Institute of Foreign Trade Delhi", "city": "Delhi", "state": "Delhi" }
 ]

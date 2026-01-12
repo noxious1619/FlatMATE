@@ -1,4 +1,4 @@
-import { NextResponse } from "next/server";
+  import { NextResponse } from "next/server";
 import prisma from "@/app/lib/prisma";
 import { getServerSession } from "next-auth";
 import { authOptions } from "../../auth/[...nextauth]/options";
@@ -12,6 +12,10 @@ export async function GET(
     const { id } = await params;
     const listing = await prisma.listing.findUnique({
       where: { id },
+      include: {
+        location: true,
+        collegeDetails: true,
+      }
     });
 
     if (!listing) {
@@ -43,7 +47,7 @@ export async function PATCH(
     // Verify ownership
     const existing = await prisma.listing.findUnique({
       where: { id },
-      select: { ownerId: true }
+      select: { ownerId: true, locationId: true }
     });
 
     if (!existing) {
@@ -54,6 +58,18 @@ export async function PATCH(
       return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     }
 
+    // Prepare location update if provided
+    let locationUpdate = {};
+    if (body.location) {
+      locationUpdate = {
+        update: {
+          latitude: body.location.latitude,
+          longitude: body.location.longitude,
+          displayAddress: body.location.displayAddress,
+        }
+      };
+    }
+
     // Update
     const updated = await prisma.listing.update({
       where: { id },
@@ -62,8 +78,8 @@ export async function PATCH(
         description: body.description,
         price: Number(body.price),
         deposit: Number(body.deposit),
-        address: body.address,
-        // tags
+
+        // Update tags
         tag_ac: body.tag_ac,
         tag_cooler: body.tag_cooler,
         tag_noBrokerage: body.tag_noBrokerage,
@@ -73,6 +89,15 @@ export async function PATCH(
         tag_geyser: body.tag_geyser,
         tag_metroNear: body.tag_metroNear,
         tag_noRestrictions: body.tag_noRestrictions,
+
+        // Update college (Using relation connect/disconnect)
+        collegeDetails: body.collegeId
+          ? { connect: { id: body.collegeId } }
+          : { disconnect: true },
+
+        // Update location
+        location: locationUpdate,
+
         // images
         images: body.images
       }

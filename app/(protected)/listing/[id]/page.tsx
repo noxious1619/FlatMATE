@@ -3,9 +3,10 @@ import { ArrowLeft, MapPin, IndianRupee, ShieldCheck, User, Share2, Bookmark } f
 import Link from "next/link";
 import prisma from "@/app/lib/prisma";
 import { notFound } from "next/navigation";
-import { getTestUser } from "@/app/lib/mockAuth"; 
-import ListingInteraction from "@/app/(protected)/components/ListingInteraction"; 
-import ShareListing from "@/app/(protected)/components/ShareListing"; 
+import { getTestUser } from "@/app/lib/mockAuth";
+import ListingInteraction from "@/app/(protected)/components/ListingInteraction";
+import ShareListing from "@/app/(protected)/components/ShareListing";
+import LocationMap from "@/app/(protected)/components/DynamicLocationMap";
 
 // Helper to format currency
 const formatPrice = (price: number) => {
@@ -14,14 +15,14 @@ const formatPrice = (price: number) => {
 
 // 1. UPDATE TYPE DEFINITION HERE
 type Props = {
-  params: Promise<{ id: string }>;
+    params: Promise<{ id: string }>;
 };
 
 export default async function ListingDetails(props: Props) {
     // 2. AWAIT PARAMS HERE
     const params = await props.params;
     const { id } = params;
-    
+
     // 3. Get Current User
     const user = getTestUser();
     const currentUserId = user ? user.id : "";
@@ -41,10 +42,12 @@ export default async function ListingDetails(props: Props) {
                     college: true,
                     image: true,
                     emailVerified: true,
-                    email: true, 
-                    phoneNumber: true 
+                    email: true,
+                    phoneNumber: true
                 }
-            }
+            },
+            location: true,
+            collegeDetails: true,
         }
     });
 
@@ -53,7 +56,7 @@ export default async function ListingDetails(props: Props) {
     }
 
     // 5. Check Connection Status
-    let requestStatus = null; 
+    let requestStatus = null;
     let contactDetails = null;
 
     if (user) {
@@ -67,8 +70,8 @@ export default async function ListingDetails(props: Props) {
         });
 
         if (connection) {
-            requestStatus = connection.status; 
-            
+            requestStatus = connection.status;
+
             if (connection.status === "ACCEPTED") {
                 contactDetails = {
                     phone: listing.owner.phoneNumber,
@@ -97,17 +100,17 @@ export default async function ListingDetails(props: Props) {
         <main className="min-h-screen bg-brand-bg pb-32">
             <Navbar />
 
-            <div className="max-w-4xl mx-auto p-4">
+            <div className="max-w-6xl mx-auto p-4">
 
                 {/* BACK BUTTON */}
                 <Link href="/feed" className="inline-flex items-center gap-2 font-mono font-bold mb-6 hover:underline">
                     <ArrowLeft size={20} /> BACK
                 </Link>
 
-                <div className="grid md:grid-cols-3 gap-8">
+                <div className="grid md:grid-cols-5 gap-8">
 
                     {/* LEFT COLUMN: IMAGES & INFO */}
-                    <div className="md:col-span-2 space-y-6">
+                    <div className="md:col-span-3 space-y-6">
 
                         {/* HERO IMAGE */}
                         <div className="bg-white p-2 rotate-1 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] border-2 border-black">
@@ -130,22 +133,22 @@ export default async function ListingDetails(props: Props) {
                                     </button> */}
                                     <ShareListing />
                                     <button className="p-2 border-2 border-black bg-white hover:bg-black hover:text-white transition-colors shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
-                                        <Bookmark size={20}  />
+                                        <Bookmark size={20} />
                                     </button>
                                 </div>
                             </div>
 
-                            {listing.address && (
-                            <div className="flex flex-col items-start gap-2 font-mono text-gray-600 mb-4">
-                                <div className="flex mt-2 mb-5 items-center text-xl">
-                                    <MapPin size={25} className="mr-2 text-black"/>
-                                    <p>{listing.address}</p>
+                            {listing.location?.displayAddress && (
+                                <div className="flex flex-col items-start gap-2 font-mono text-gray-600 mb-4">
+                                    <div className="flex mt-2 mb-2 items-center text-xl font-bold text-black">
+                                        <MapPin size={24} className="mr-2" />
+                                        <p>{listing.location.displayAddress}</p>
+                                    </div>
+                                    <div className="flex items-center gap-2 text-sm font-bold text-black border-2 border-black px-3 py-1 bg-brand-yellow shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]">
+                                        <User size={18} />
+                                        <span>{listing.category}</span>
+                                    </div>
                                 </div>
-                                <div className="flex items-center gap-2 text-sm font-bold text-black border-2 border-black px-3 py-1 bg-brand-yellow shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]">
-                                    <User size={18} />
-                                    <span>{listing.category}</span>
-                                </div>                                
-                            </div>
                             )}
 
                             <div className="flex gap-4 mb-6">
@@ -189,9 +192,9 @@ export default async function ListingDetails(props: Props) {
                         </div>
                     </div>
 
-                    {/* RIGHT COLUMN: LISTER PROFILE (Sticky) */}
-                    <div className="md:col-span-1">
-                        <div className="sticky top-24">
+                    <div className="md:col-span-2">
+                        {/* RIGHT COLUMN: LISTER PROFILE (Sticky) */}
+                        <div className="mb-6">
                             <div className="bg-white border-2 border-black p-6 shadow-retro text-center">
                                 <div className="w-20 h-20 bg-gray-200 rounded-full border-2 border-black mx-auto mb-4 overflow-hidden">
                                     <img src={ownerImage} alt="Avatar" className="w-full h-full object-cover" />
@@ -207,7 +210,7 @@ export default async function ListingDetails(props: Props) {
                                 )}
 
                                 {/* --- INTERACTIVE BUTTONS COMPONENT --- */}
-                                <ListingInteraction 
+                                <ListingInteraction
                                     listingId={listing.id}
                                     ownerId={listing.owner.id}
                                     currentUserId={currentUserId}
@@ -218,8 +221,8 @@ export default async function ListingDetails(props: Props) {
                                 {/* ----------------------------------- */}
 
                                 <p className="text-[10px] font-mono text-gray-400 mt-2">
-                                    {requestStatus === "ACCEPTED" 
-                                        ? "Details revealed!" 
+                                    {requestStatus === "ACCEPTED"
+                                        ? "Details revealed!"
                                         : "Identity hidden until you match."}
                                 </p>
 
@@ -230,6 +233,34 @@ export default async function ListingDetails(props: Props) {
                                 </div>
                             </div>
                         </div>
+
+                        {/* COLLEGE */}
+                            {listing.collegeDetails && (
+                                <div className="mb-6 flex items-center gap-3 bg-blue-50 border-2 border-blue-200 p-3 rounded-md">
+                                    <div className="bg-blue-100 p-2 rounded-full">
+                                        <MapPin className="text-blue-600" size={24} />
+                                    </div>
+                                    <div>
+                                        <p className="text-xs font-bold text-blue-500 uppercase tracking-wider">Near College</p>
+                                        <p className="font-heavy text-lg leading-none">{listing.collegeDetails.name}</p>
+                                        <p className="text-xs font-mono text-gray-500">{listing.collegeDetails.city}</p>
+                                    </div>
+                                </div>
+                            )}
+
+                            {/* MAP */}
+                            {listing.location && (
+                                <div className="mb-8 border-2 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
+                                    <LocationMap
+                                        lat={listing.location.latitude}
+                                        lng={listing.location.longitude}
+                                        readOnly={true}
+                                    />
+                                    
+                                </div>
+                            )}
+                        
+
                     </div>
 
                 </div>

@@ -13,7 +13,7 @@ const markerIcon = new L.Icon({
 type Props = {
   lat: number;
   lng: number;
-  onChange: (lat: number, lng: number) => void;
+  onChange?: (lat: number, lng: number) => void;
 };
 
 function DraggableMarker({ lat, lng, onChange }: Props) {
@@ -26,7 +26,7 @@ function DraggableMarker({ lat, lng, onChange }: Props) {
   useMapEvents({
     click(e) {
       setPosition([e.latlng.lat, e.latlng.lng]);
-      onChange(e.latlng.lat, e.latlng.lng);
+      if (onChange) onChange(e.latlng.lat, e.latlng.lng);
     },
   });
 
@@ -38,7 +38,7 @@ function DraggableMarker({ lat, lng, onChange }: Props) {
       eventHandlers={{
         dragend: (e) => {
           const p = e.target.getLatLng();
-          onChange(p.lat, p.lng);
+          if (onChange) onChange(p.lat, p.lng);
         },
       }}
     />
@@ -57,9 +57,9 @@ function RecenterMap({ lat, lng }: { lat: number; lng: number }) {
   return null;
 }
 
-export default function LocationMap({ lat, lng, onChange }: Props) {
-    const [position, setPosition] = useState<[number, number]>([lat, lng]);
-    // Keep marker position in sync
+export default function LocationMap({ lat, lng, onChange, readOnly = false }: Props & { readOnly?: boolean }) {
+  const [position, setPosition] = useState<[number, number]>([lat, lng]);
+  // Keep marker position in sync
   useEffect(() => {
     setPosition([lat, lng]);
   }, [lat, lng]);
@@ -68,11 +68,10 @@ export default function LocationMap({ lat, lng, onChange }: Props) {
     <MapContainer
       center={[lat, lng]}
       zoom={18}
-      scrollWheelZoom
+      scrollWheelZoom={!readOnly}
       className="h-[320px] w-full border-2 border-black"
     >
       <TileLayer
-        attribution="© OpenStreetMap"
         url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
       />
 
@@ -81,15 +80,15 @@ export default function LocationMap({ lat, lng, onChange }: Props) {
 
       <Marker
         position={position}
-        draggable
+        draggable={!readOnly}
         icon={markerIcon}
-        eventHandlers={{
+        eventHandlers={!readOnly ? {
           dragend: (e) => {
             const p = e.target.getLatLng();
             setPosition([p.lat, p.lng]);
-            onChange(p.lat, p.lng);
+            if (onChange) onChange(p.lat, p.lng);
           },
-        }}
+        } : undefined}
       />
     </MapContainer>
   );

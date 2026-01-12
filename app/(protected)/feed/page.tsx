@@ -1,17 +1,22 @@
-import ListingCard from "../components/ListingCard";
 import Navbar from "../../components/Navbar";
-import { Filter, Plus } from "lucide-react";
-import Link from "next/link";
+import { ListingCategory, SharingType, FurnishedStatus, GenderPreference } from "@prisma/client";
 import prisma from "@/app/lib/prisma";
-import DropdownFilters from "@/app/(protected)/components/DropdownFilters";
-import { Category } from "@prisma/client";
+import FeedClient from "./FeedClient";
+import FeedSidebar from "./FeedSidebar";
+import FeedLayout from "./FeedLayout";
+import PaginationControls from "./PaginationControls";
 
 export const dynamic = "force-dynamic";
 
-// 1. Define the type to expect a Promise
 type FeedPageProps = {
   searchParams: Promise<{
+    query?: string;
     category?: string;
+    minPrice?: string;
+    maxPrice?: string;
+    sharing?: string;
+    furnished?: string;
+    gender?: string;
     ac?: string;
     cooler?: string;
     noBroker?: string;
@@ -21,16 +26,56 @@ type FeedPageProps = {
     geyser?: string;
     metroNear?: string;
     noRules?: string;
+    college?: string;
+    page?: string;
   }>;
 };
 
 export default async function FeedPage(props: FeedPageProps) {
-  // 2. Await the searchParams immediately
   const searchParams = await props.searchParams;
+
+  // ---------- Pagination ----------
+  const page = Number(searchParams.page) || 1;
+  const limit = 8;
+  const skip = (page - 1) * limit;
 
   // ---------- Prisma Filters ----------
   const filters: any = { isAvailable: true };
-  if (searchParams.category) filters.category = searchParams.category as Category;
+
+  // 1. Text Search (Location)
+  if (searchParams.query) {
+    filters.location = {
+      displayAddress: {
+        contains: searchParams.query,
+        mode: 'insensitive'
+      }
+    };
+  }
+
+  // 1.5 College Search
+  if (searchParams.college) {
+    filters.collegeDetails = {
+      name: {
+        contains: searchParams.college,
+        mode: 'insensitive'
+      }
+    };
+  }
+
+  // 2. Enums
+  if (searchParams.category) filters.category = searchParams.category as ListingCategory;
+  if (searchParams.sharing) filters.sharingType = searchParams.sharing as SharingType;
+  if (searchParams.furnished) filters.furnishedStatus = searchParams.furnished as FurnishedStatus;
+  if (searchParams.gender) filters.genderPreference = searchParams.gender as GenderPreference;
+
+  // 3. Price Range
+  if (searchParams.minPrice || searchParams.maxPrice) {
+    filters.price = {};
+    if (searchParams.minPrice) filters.price.gte = Number(searchParams.minPrice);
+    if (searchParams.maxPrice) filters.price.lte = Number(searchParams.maxPrice);
+  }
+
+  // 4. Boolean Tags
   if (searchParams.ac === "true") filters.tag_ac = true;
   if (searchParams.cooler === "true") filters.tag_cooler = true;
   if (searchParams.noBroker === "true") filters.tag_noBrokerage = true;
@@ -41,74 +86,31 @@ export default async function FeedPage(props: FeedPageProps) {
   if (searchParams.metroNear === "true") filters.tag_metroNear = true;
   if (searchParams.noRules === "true") filters.tag_noRestrictions = true;
 
-  const rawListings = await prisma.listing.findMany({
-    where: filters,
-    orderBy: { createdAt: "desc" },
-  });
+  // Execute query with pagination using transaction
+  const [totalCount, rawListings] = await prisma.$transaction([
+    prisma.listing.count({ where: filters }),
+    prisma.listing.findMany({
+      where: filters,
+      orderBy: { createdAt: "desc" },
+      include: {
+        location: true
+      },
+      skip,
+      take: limit,
+    })
+  ]);
 
-  // console.log("rawListings:", rawListings);
-
-  const buttonClass = (active: boolean) =>
-    active
-      ? "bg-black text-white border-2 border-black px-4 py-2 font-mono text-sm font-bold whitespace-nowrap"
-      : "bg-white border-2 border-black px-4 py-2 font-mono text-sm font-bold hover:bg-black hover:text-white transition-colors whitespace-nowrap";
-
-  // 3. Instead of passing a function to DropdownFilters, 
-  // we just pass the current searchParams as an object.
-  // The logic to build the URL should happen INSIDE DropdownFilters.
+  const totalPages = Math.ceil(totalCount / limit);
 
   return (
     <main className="min-h-screen bg-brand-bg pb-20">
       <Navbar />
 
-      <div className="sticky top-0 z-40 bg-brand-bg/95 backdrop-blur-sm border-b-2 border-black p-4">
-        <div className="max-w-6xl mx-auto flex gap-4 overflow-visible no-scrollbar">
-          <button className="flex items-center gap-2 bg-white border-2 border-black px-4 py-2 font-mono text-sm font-bold shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] whitespace-nowrap">
-            <Filter size={16} /> FILTERS
-          </button>
+      <FeedLayout sidebar={<FeedSidebar />}>
+        <FeedClient listings={rawListings} />
+        <PaginationControls currentPage={page} totalPages={totalPages} />
+      </FeedLayout>
 
-          {/* Use manual logic for the Boys/Girls links in this server component */}
-          <Link href={`/feed?${new URLSearchParams({ ...searchParams, category: 'BOYS' }).toString()}`}>
-            <button className={buttonClass(searchParams.category === "BOYS")}>Boys</button>
-          </Link>
-
-          <Link href={`/feed?${new URLSearchParams({ ...searchParams, category: 'GIRLS' }).toString()}`}>
-            <button className={buttonClass(searchParams.category === "GIRLS")}>Girls</button>
-          </Link>
-
-          <DropdownFilters
-            currentParams={searchParams}
-          />
-
-          <Link href="/feed">
-            <button className="bg-white border-2 border-black px-4 py-2 font-mono text-sm font-bold hover:bg-black hover:text-white transition-colors">
-              Clear
-            </button>
-
-          </Link>
-        </div>
-      </div>
-
-      <div className="max-w-6xl mx-auto p-4 md:p-6">
-        {rawListings.length === 0 ? (
-          <div className="text-center py-20 font-mono opacity-50">No listings found...</div>
-        ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-            {rawListings.map((listing) => (
-              <ListingCard
-                key={listing.id}
-                title={listing.title}
-                id={listing.id}
-                rent={listing.price.toLocaleString("en-IN")}
-                location={listing.address}
-                category={listing.category}
-                tags={[]}
-                imageUrl={listing.images[0] || "fallback_url"}
-              />
-            ))}
-          </div>
-        )}
-      </div>
     </main>
   );
 }

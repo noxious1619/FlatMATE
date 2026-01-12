@@ -2,9 +2,16 @@
 
 import Navbar from "@/app/components/Navbar";
 import { Camera, IndianRupee, MapPin, Check, Type, ArrowLeft, Save, Loader2 } from "lucide-react";
-import { useEffect, useState, Suspense } from "react";
+import { useEffect, useState, Suspense, useRef } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
+import { searchAddress } from "@/app/helper/searchAddress";
+import dynamic from "next/dynamic";
+
+const LocationMap = dynamic(
+    () => import("@/app/(protected)/components/locationMap"),
+    { ssr: false }
+);
 
 function EditListingContent() {
     const router = useRouter();
@@ -14,13 +21,30 @@ function EditListingContent() {
     const [loading, setLoading] = useState(true);
     const [saving, setSaving] = useState(false);
 
+    // Location & College State
+    const [suggestions, setSuggestions] = useState<any[]>([]);
+    const debounceRef = useRef<NodeJS.Timeout | null>(null);
+    const [colleges, setColleges] = useState<any[]>([]);
+
+    useEffect(() => {
+        fetch("/api/colleges")
+            .then(res => res.json())
+            .then(setColleges)
+            .catch(err => console.error("Failed to load colleges", err));
+    }, []);
+
     // 1. FORM STATE
     const [formData, setFormData] = useState({
         title: "",
         rent: "",
         deposit: "",
-        address: "",
         description: "",
+        collegeId: "",
+        location: {
+            latitude: 28.6139,
+            longitude: 77.2090,
+            displayAddress: ""
+        }
     });
 
     const [images, setImages] = useState<(string | File)[]>([]); // Mix of URLs and Files
@@ -63,8 +87,17 @@ function EditListingContent() {
                         title: data.title,
                         rent: String(data.price),
                         deposit: String(data.deposit || ""),
-                        address: data.address || "", // Use address field
-                        description: data.description
+                        description: data.description,
+                        collegeId: data.collegeId || "",
+                        location: data.location ? {
+                            latitude: data.location.latitude,
+                            longitude: data.location.longitude,
+                            displayAddress: data.location.displayAddress
+                        } : {
+                            latitude: 28.6139,
+                            longitude: 77.2090,
+                            displayAddress: ""
+                        }
                     });
 
                     // Set images (existing URLs)
@@ -143,7 +176,9 @@ function EditListingContent() {
                 description: formData.description,
                 price: Number(formData.rent),
                 deposit: Number(formData.deposit) || 0,
-                address: formData.address,
+                // description: formData.description, // Removed duplicate
+                collegeId: formData.collegeId || null,
+                location: formData.location, // Nested update handled by API
                 images: finalImages,
 
                 // Map frontend tags to backend
@@ -254,18 +289,113 @@ function EditListingContent() {
                             </div>
                         </div>
 
+                        {/* LOCATION */}
                         <div className="md:col-span-2">
-                            <label className="font-mono text-xs font-bold block mb-2">ADDRESS / LOCATION</label>
+                            <label className="font-mono text-xs font-bold block mb-2">
+                                EXACT LOCATION
+                            </label>
+
                             <div className="relative">
                                 <MapPin className="absolute left-3 top-3 text-gray-400" size={20} />
                                 <input
-                                    name="address"
-                                    value={formData.address}
-                                    onChange={handleChange}
                                     type="text"
-                                    placeholder="e.g. Sector 22, Rohini"
-                                    className="w-full bg-gray-50 border-2 border-black pl-10 p-3 font-mono focus:bg-yellow-50 focus:outline-none transition-colors"
+                                    placeholder="Search & pin exact location"
+                                    value={formData.location.displayAddress}
+                                    onChange={(e) => {
+                                        setSuggestions([]);
+                                        const value = e.target.value;
+                                        setFormData((prev) => ({
+                                            ...prev,
+                                            location: {
+                                                ...prev.location,
+                                                displayAddress: value,
+                                            },
+                                        }));
+                                        if (debounceRef.current) clearTimeout(debounceRef.current);
+                                        if (value.length < 3) return;
+                                        debounceRef.current = setTimeout(async () => {
+                                            const res = await searchAddress(value);
+                                            if (Array.isArray(res)) setSuggestions(res);
+                                        }, 500);
+                                    }}
+                                    required
+                                    className="w-full bg-gray-50 border-2 border-black pl-10 p-3 font-mono"
                                 />
+
+                                {/* AUTOSUGGEST DROPDOWN */}
+                                {suggestions.length > 0 && (
+                                    <div className="absolute left-0 top-full z-50 w-full bg-white border-2 border-black mt-1 max-h-60 overflow-auto">
+                                        {suggestions.map((s) => (
+                                            <button
+                                                type="button"
+                                                key={s.place_id}
+                                                onMouseDown={(e) => {
+                                                    e.preventDefault();
+                                                    setFormData((prev) => ({
+                                                        ...prev,
+                                                        location: {
+                                                            latitude: Number(s.lat),
+                                                            longitude: Number(s.lon),
+                                                            displayAddress: s.display_name,
+                                                        },
+                                                    }));
+                                                    setSuggestions([]);
+                                                }}
+                                                className="block w-full text-left px-3 py-2 hover:bg-gray-100 font-mono text-xs"
+                                            >
+                                                {s.display_name}
+                                            </button>
+                                        ))}
+                                    </div>
+                                )}
+                            </div>
+
+                            {/* MAP */}
+                            <div className="mt-4">
+                                <LocationMap
+                                    lat={formData.location.latitude}
+                                    lng={formData.location.longitude}
+                                    onChange={(lat, lng) =>
+                                        setFormData((prev) => ({
+                                            ...prev,
+                                            location: {
+                                                ...prev.location,
+                                                latitude: lat,
+                                                longitude: lng,
+                                            },
+                                        }))
+                                    }
+                                />
+                                <p className="font-mono text-xs text-gray-500 mt-2">
+                                    Drag pin to adjust
+                                </p>
+                            </div>
+                        </div>
+
+                        {/* COLLEGE */}
+                        <div className="md:col-span-2">
+                            <label className="font-mono text-xs font-bold block mb-2">
+                                NEARBY COLLEGE
+                            </label>
+                            <div className="relative">
+                                <MapPin className="absolute left-3 top-3 text-gray-400" size={20} />
+                                <select
+                                    value={formData.collegeId}
+                                    onChange={(e) =>
+                                        setFormData((prev) => ({
+                                            ...prev,
+                                            collegeId: e.target.value
+                                        }))
+                                    }
+                                    className="w-full bg-gray-50 border-2 border-black pl-10 p-3 font-mono focus:bg-yellow-50 focus:outline-none appearance-none cursor-pointer"
+                                >
+                                    <option value="">Select College...</option>
+                                    {colleges.map((c) => (
+                                        <option key={c.id} value={c.id}>
+                                            {c.name}
+                                        </option>
+                                    ))}
+                                </select>
                             </div>
                         </div>
 
