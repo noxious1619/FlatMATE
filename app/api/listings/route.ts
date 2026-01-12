@@ -111,7 +111,7 @@ export async function POST(req: Request) {
         category,
         address: address || "",
         isAvailable: true,
-        college,
+        college: college || "",
 
         // Map the boolean tags directly
         tag_ac: !!tag_ac,
