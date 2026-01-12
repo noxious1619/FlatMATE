@@ -4,17 +4,17 @@ import "./globals.css";
 import Providers from "./provider";
 import ClientToaster from "./components/ClientToaster";
 import "leaflet/dist/leaflet.css";
-
+import Footer from "./components/Footer";
 
 // 1. Configure the Retro Fonts
-const archivo = Archivo_Black({ 
-  weight: "400", 
+const archivo = Archivo_Black({
+  weight: "400",
   subsets: ["latin"],
   variable: "--font-heavy"
 });
 
-const spaceMono = Space_Mono({ 
-  weight: ["400", "700"], 
+const spaceMono = Space_Mono({
+  weight: ["400", "700"],
   subsets: ["latin"],
   variable: "--font-mono"
 });
@@ -31,10 +31,15 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body
-        className={`${archivo.variable} ${spaceMono.variable} bg-[#E6ECEE] text-black antialiased`}
+        className={`${archivo.variable} ${spaceMono.variable} bg-[#E6ECEE] text-black antialiased flex flex-col min-h-screen`}
       >
-        <Providers>{children}</Providers>
+        <Providers>
+          <div className="flex-1 flex flex-col">
+            {children}
+          </div>
+        </Providers>
         <ClientToaster />
+        <Footer />
       </body>
     </html>
   );

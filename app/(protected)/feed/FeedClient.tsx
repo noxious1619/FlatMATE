@@ -35,14 +35,14 @@ export default function FeedClient({ listings }: Props) {
                 </button>
             </div>
 
-            <div className="grid md:grid-cols-5 gap-6">
+            <div className="grid md:grid-cols-6 gap-6">
 
                 {/* LISTINGS COLUMN */}
-                <div className={`md:col-span-3 ${viewMode === "MAP" ? "hidden md:block" : "block"}`}>
+                <div className={`md:col-span-4 ${viewMode === "MAP" ? "hidden md:block" : "block"}`}>
                     {listings.length === 0 ? (
                         <div className="text-center py-20 font-mono opacity-50">No listings found...</div>
                     ) : (
-                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 pb-20">
+                        <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 pb-20">
                             {listings.map((listing) => (
                                 <ListingCard
                                     key={listing.id}

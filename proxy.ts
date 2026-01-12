@@ -64,8 +64,7 @@ export const config = {
 
         "/blacklisted",
         "/chats/:path*",
-        "/feed",
-        "/guidelines",
+        // "/feed",
         "/listing/:path*",
         "/profile/:path*",
         "/saved-listings/:path*",

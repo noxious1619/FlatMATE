@@ -21,7 +21,7 @@ export default function FeedLayout({ sidebar, children }: Props) {
     return (
         <div className="min-h-screen">
             {/* TOP HEADER */}
-            <div className="sticky top-0 z-40 bg-brand-bg/95 backdrop-blur-sm border-b-2 border-black p-4 mb-4">
+            <div className="sticky top-0 z-40 bg-brand-bg/95 backdrop-blur-sm p-2 mb-2">
                 <div className="max-w-7xl mx-auto flex items-center gap-4">
 
                     {/* FILTER TOGGLE BUTTON */}
@@ -42,7 +42,7 @@ export default function FeedLayout({ sidebar, children }: Props) {
                 </div>
             </div>
 
-            <div className="max-w-[1600px] mx-auto p-4 md:p-6 relative">
+            <div className="max-w-[1600px] mx-auto p-2 md:p-6 relative">
                 <div className="flex gap-6 relative">
 
 
