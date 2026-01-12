@@ -1,5 +1,5 @@
 model ConnectionRequest {
-  id        String   @id @default(uuid())
+  id        String   @id @default(cuid())
   status    String   @default("PENDING") // Options: "PENDING", "ACCEPTED", "REJECTED"
   message   String?  // Optional message from sender
   createdAt DateTime @default(now())

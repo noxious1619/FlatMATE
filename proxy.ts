@@ -2,7 +2,7 @@ import { withAuth } from "next-auth/middleware";
 import { NextResponse } from "next/server";
 
 export default withAuth(
-  function middleware(req) {
+  function proxy(req) {
     const token = req.nextauth.token;
     const { pathname } = req.nextUrl;
 
@@ -13,6 +13,17 @@ export default withAuth(
     //Not Allow- Logged-in user visiting login/signup
     if (token && isAuthPage) {
       return NextResponse.redirect(new URL("/feed", req.url));
+    }
+
+    //Not Allow - Unverified users
+    if (
+      token &&
+      !token.emailVerified &&
+      !pathname.startsWith("/verification-pending") &&
+      !pathname.startsWith("/verify-email") &&
+      !isAuthPage
+    ) {
+      return NextResponse.redirect(new URL("/verification-pending", req.url));
     }
 
     //Allow Only Admin to access /admin routes
@@ -40,9 +51,6 @@ export default withAuth(
         return !!token;
       },
     },
-    pages: {
-      signIn: "/login",
-    },
   }
 );
 export const config = {
@@ -59,5 +67,8 @@ export const config = {
         "/saved-listings/:path*",
         
         "/admin/:path*",
+
+        "/verification-pending/:path*",
+        "/verify-email/:path*",
     ]
 };

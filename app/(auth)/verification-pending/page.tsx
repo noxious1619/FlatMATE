@@ -4,6 +4,7 @@ import Link from "next/link";
 import { ArrowLeft, Mail, CheckCircle, ArrowRight } from "lucide-react";
 import React, { Suspense } from "react";
 import { useSearchParams } from "next/navigation";
+import toast from "react-hot-toast";
 
 // Component to access search params securely
 function PendingContent() {
@@ -45,6 +46,7 @@ function PendingContent() {
 }
 
 export default function VerificationPendingPage() {
+    toast.error("Please verify your email to continue.");
     return (
         <main className="min-h-screen bg-[#F0F0F0] flex flex-col items-center justify-center p-4 relative overflow-hidden">
 

@@ -58,7 +58,7 @@ export default function DropdownFilters({ currentParams }: { currentParams: Reco
                 onClick={() => setOpen(!open)}
                 className="flex items-center gap-2 bg-white border-2 border-black px-4 py-2 font-mono text-sm font-bold hover:bg-black hover:text-white transition-colors whitespace-nowrap"
             >
-                Other Filters
+                Other Facilities
                 <ChevronDown size={16} />
             </button>
 

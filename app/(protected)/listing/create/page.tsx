@@ -6,6 +6,101 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import toast from "react-hot-toast";
 
+const DELHI_COLLEGES = [
+  // --- TECHNICAL & MAJOR UNIVERSITIES ---
+  "Delhi Technological University (DTU)",
+  "Netaji Subhas University of Technology (NSUT)",
+  "Indraprastha Institute of Information Technology Delhi (IIIT-D)",
+  "Indira Gandhi Delhi Technical University for Women (IGDTUW)",
+  "Jawaharlal Nehru University (JNU)",
+  "Jamia Millia Islamia (JMI)",
+  "Indian Institute of Technology Delhi (IIT Delhi)",
+  "National Law University, Delhi (NLU)",
+  "Dr. B.R. Ambedkar University Delhi (AUD)",
+  "Guru Gobind Singh Indraprastha University (USS - Main Campus)",
+
+  // --- GGSIPU (IP UNIVERSITY) AFFILIATED ---
+  "Maharaja Agrasen Institute of Technology (MAIT)",
+  "Maharaja Surajmal Institute of Technology (MSIT)",
+  "University School of Information, Communication and Technology (USICT)",
+  "Bhagwan Parshuram Institute of Technology (BPIT)",
+  "Bharati Vidyapeeth's College of Engineering (BVCOE)",
+  "Vivekananda Institute of Professional Studies (VIPS)",
+  "Guru Tegh Bahadur Institute of Technology (GTBIT)",
+  "Dr. Akhilesh Das Gupta Institute of Technology & Management (ADGITM)",
+  "Jagan Institute of Management Studies (JIMS) - Rohini",
+  "Jagan Institute of Management Studies (JIMS) - Vasant Kunj",
+  "Trinity Institute of Professional Studies (TIPS)",
+  "Maharaja Agrasen Institute of Management Studies (MAIMS)",
+  "Delhi Institute of Advanced Studies (DIAS)",
+  "Ideal Institute of Management and Technology (IIMT)",
+  "Institute of Information Technology & Management (IITM) - Janakpuri",
+  "HMR Institute of Technology & Management",
+  "Guru Nanak Institute of Management",
+  "Tecnia Institute of Advanced Studies",
+  "Gitarattan International Business School (GIBS)",
+  "Banarsidas Chandiwala Institute of Hotel Management",
+  "Delhi Technical Campus (DTC) - Greater Noida",
+  "Vardhman Mahavir Medical College (VMMC)",
+
+  // --- DELHI UNIVERSITY (DU) - NORTH CAMPUS ---
+  "St. Stephen's College",
+  "Shri Ram College of Commerce (SRCC)",
+  "Hindu College",
+  "Hansraj College",
+  "Kirori Mal College (KMC)",
+  "Miranda House",
+  "Ramjas College",
+  "Daulat Ram College",
+  "Indraprastha College for Women (IP College)",
+  "SGTB Khalsa College",
+  "Shaheed Sukhdev College of Business Studies (SSCBS)",
+
+  // --- DELHI UNIVERSITY (DU) - SOUTH CAMPUS & OTHERS ---
+  "Lady Shri Ram College for Women (LSR)",
+  "Sri Venkateswara College (Venky)",
+  "Jesus and Mary College (JMC)",
+  "Gargi College",
+  "Kamala Nehru College (KNC)",
+  "Delhi College of Arts and Commerce (DCAC)",
+  "Atma Ram Sanatan Dharma College (ARSD)",
+  "Maitreyi College",
+  "Motilal Nehru College",
+  "Ram Lal Anand College",
+  "Aryabhatta College",
+  "College of Vocational Studies (CVS)",
+  "Deshbandhu College",
+  "Acharya Narendra Dev College (ANDC)",
+  "Ramanujan College",
+  "P.G.D.A.V. College",
+
+  // --- DELHI UNIVERSITY (DU) - OFF CAMPUS ---
+  "Deen Dayal Upadhyaya College (DDU)",
+  "Keshav Mahavidyalaya",
+  "Maharaja Agrasen College (DU)",
+  "Shaheed Bhagat Singh College",
+  "Shivaji College",
+  "Rajdhani College",
+  "Lakshmibai College",
+  "Satyawati College",
+  "Shyam Lal College",
+  "Vivekananda College",
+  "Kalindi College",
+  "Janki Devi Memorial College",
+  "Mata Sundri College",
+  "Zakir Husain Delhi College",
+  "Sri Guru Gobind Singh College of Commerce (SGGSCC)",
+  "Sri Guru Nanak Dev Khalsa College",
+
+  // --- MEDICAL & OTHERS ---
+  "All India Institute of Medical Sciences (AIIMS)",
+  "Maulana Azad Medical College (MAMC)",
+  "Lady Hardinge Medical College (LHMC)",
+  "University College of Medical Sciences (UCMS)",
+  "School of Planning and Architecture (SPA)",
+  "National Institute of Fashion Technology (NIFT) - Delhi",
+  "Institute of Home Economics",
+];
 
 export default function CreateListing() {
   const router = useRouter();
@@ -17,6 +112,7 @@ export default function CreateListing() {
     rent: "",
     deposit: "",
     location: "",
+    college: "",
     category: "",
     description: ""
   });
@@ -43,90 +139,91 @@ export default function CreateListing() {
 
   // 4. IMAGE UPLOAD TO CLOUDINARY
   const handleImageUpload = async (file: File) => {
-  const formData = new FormData();
-  formData.append("file", file);
-  formData.append("upload_preset", "listing_images");
+    const formData = new FormData();
+    formData.append("file", file);
+    formData.append("upload_preset", "listing_images");
 
-  try {
-    const res = await fetch(
-      "https://api.cloudinary.com/v1_1/dwg5nsiio/image/upload",
-      {
-        method: "POST",
-        body: formData,
+    try {
+      const res = await fetch(
+        "https://api.cloudinary.com/v1_1/dwg5nsiio/image/upload",
+        {
+          method: "POST",
+          body: formData,
+        }
+      );
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        throw new Error(data.error?.message || "Image upload failed");
       }
-    );
 
-    const data = await res.json();
-
-    if (!res.ok) {
-      throw new Error(data.error?.message || "Image upload failed");
+      return data.secure_url;
+    } catch (err) {
+      console.error("Image upload error:", err);
+      toast.error("Failed to upload image");
+      throw err; // IMPORTANT: stop form submission
     }
-
-    return data.secure_url;
-  } catch (err) {
-    console.error("Image upload error:", err);
-    toast.error("Failed to upload image");
-    throw err; // IMPORTANT: stop form submission
-  }
-};
+  };
 
 
   // 3. SUBMIT TO API
   const handleSubmit = async (e: React.FormEvent) => {
-  e.preventDefault();
-  setIsSubmitting(true);
+    e.preventDefault();
+    setIsSubmitting(true);
 
-  try {
-    // Upload images
-    const imageUrls = await Promise.all(
-      images.map((file) => handleImageUpload(file))
-    );
+    try {
+      // Upload images
+      const imageUrls = await Promise.all(
+        images.map((file) => handleImageUpload(file))
+      );
 
-    const payload = {
-      title: formData.title,
-      category: formData.category,
-      description: `${formData.description}`,
-      address: formData.location,
-      Preference: formData.category,
-      price: Number(formData.rent),
-      deposit: Number(formData.deposit) || 0,
-      images: imageUrls,
-      tag_ac: selectedTags.includes("AC"),
-      tag_cooler: selectedTags.includes("Cooler"),
-      tag_noBrokerage: selectedTags.includes("No Brokerage"),
-      tag_wifi: selectedTags.includes("Wifi"),
-      tag_cook: selectedTags.includes("Cook"),
-      tag_maid: selectedTags.includes("Maid"),
-      tag_geyser: selectedTags.includes("Geyser"),
-      tag_metroNear: selectedTags.includes("Metro Near"),
-      tag_noRestrictions: selectedTags.includes("No Restrictions"),
-    };
+      const payload = {
+        title: formData.title,
+        category: formData.category,
+        description: `${formData.description}`,
+        address: formData.location,
+        college: formData.college,
+        Preference: formData.category,
+        price: Number(formData.rent),
+        deposit: Number(formData.deposit) || 0,
+        images: imageUrls,
+        tag_ac: selectedTags.includes("AC"),
+        tag_cooler: selectedTags.includes("Cooler"),
+        tag_noBrokerage: selectedTags.includes("No Brokerage"),
+        tag_wifi: selectedTags.includes("Wifi"),
+        tag_cook: selectedTags.includes("Cook"),
+        tag_maid: selectedTags.includes("Maid"),
+        tag_geyser: selectedTags.includes("Geyser"),
+        tag_metroNear: selectedTags.includes("Metro Near"),
+        tag_noRestrictions: selectedTags.includes("No Restrictions"),
+      };
 
-    console.log("Submitting payload:", payload);
-    
-    const res = await fetch("/api/listings", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(payload),
-    });
+      console.log("Submitting payload:", payload);
 
-    const data = await res.json();
+      const res = await fetch("/api/listings", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
 
-    if (!res.ok) {
-      toast.error(data.error || "Failed to create listing");
-      return;
+      const data = await res.json();
+
+      if (!res.ok) {
+        toast.error(data.error || "Failed to create listing");
+        return;
+      }
+
+      toast.success("🎉 Listing published successfully!");
+      router.push("/feed");
+
+    } catch (err) {
+      console.error(err);
+      toast.error("Something went wrong while creating listing");
+    } finally {
+      setIsSubmitting(false);
     }
-
-    toast.success("🎉 Listing published successfully!");
-    router.push("/feed");
-
-  } catch (err) {
-    console.error(err);
-    toast.error("Something went wrong while creating listing");
-  } finally {
-    setIsSubmitting(false);
-  }
-};
+  };
 
   return (
     <main className="min-h-screen bg-[#E6ECEE] pb-20">
@@ -222,6 +319,33 @@ export default function CreateListing() {
                   </select>
                 </div>
               </div>
+
+
+              <div className="md:col-span-2">
+                <label className="font-mono text-xs font-bold block mb-2">
+                  NEARBY COLLEGE
+                </label>
+
+                <div className="relative">
+                  <MapPin className="absolute left-3 top-3 text-gray-400" size={20} />
+
+                  <select
+                    name="college"
+                    value={formData.college}
+                    onChange={handleChange}
+                    className="w-full bg-gray-50 border-2 border-black pl-10 p-3 font-mono focus:bg-yellow-50 focus:outline-none appearance-none cursor-pointer"
+                  >
+                    <option value="">Select College...</option>
+
+                    {DELHI_COLLEGES.map((college) => (
+                      <option key={college} value={college}>
+                        {college}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+
 
               {/* GENDER PREFERENCE */}
               <div className="md:col-span-2">

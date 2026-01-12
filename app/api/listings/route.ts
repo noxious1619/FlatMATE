@@ -77,6 +77,7 @@ export async function POST(req: Request) {
       images,
       category,
       address, // Ensure address is captured
+      college,
       // Tags
       tag_ac, tag_cooler, tag_noBrokerage, tag_wifi, tag_cook,
       tag_maid, tag_geyser, tag_metroNear, tag_noRestrictions
@@ -110,6 +111,7 @@ export async function POST(req: Request) {
         category,
         address: address || "",
         isAvailable: true,
+        college,
 
         // Map the boolean tags directly
         tag_ac: !!tag_ac,

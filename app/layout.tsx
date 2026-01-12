@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { Archivo_Black, Space_Mono } from "next/font/google";
 import "./globals.css";
 import Providers from "./provider";
-import { Toaster } from "react-hot-toast";
+import ClientToaster from "./components/ClientToaster";
 
 // 1. Configure the Retro Fonts
 const archivo = Archivo_Black({ 
@@ -32,7 +32,7 @@ export default function RootLayout({
         className={`${archivo.variable} ${spaceMono.variable} bg-[#E6ECEE] text-black antialiased`}
       >
         <Providers>{children}</Providers>
-        <Toaster position="top-center" reverseOrder={false} />
+        <ClientToaster />
       </body>
     </html>
   );

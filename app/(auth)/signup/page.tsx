@@ -139,7 +139,7 @@ export default function RegisterPage() {
       if (response.status === 201) {
         // Redirect to verification pending page with email param
         router.push(`/verification-pending?email=${encodeURIComponent(user.email)}`);
-        
+
         // // Auto login or redirect
         // const result = await signIn("credentials", {
         //   redirect: false,
@@ -176,7 +176,7 @@ export default function RegisterPage() {
     <main className="min-h-screen bg-[#F0F0F0] flex flex-col items-center justify-center p-4 relative overflow-hidden">
 
       {/* BACKGROUND DECORATION */}
-      <div className="absolute top-10 -right-10 rotate-12 bg-black text-white py-2 px-20 font-mono text-sm font-bold z-0 pointer-events-none opacity-20">
+      <div className="absolute top-7 -right-10 rotate-12 bg-black text-white py-2 px-30 font-mono text-sm font-bold z-0 pointer-events-none opacity-40">
         DELHI STUDENTS ONLY /// DELHI STUDENTS ONLY
       </div>
 
@@ -194,13 +194,15 @@ export default function RegisterPage() {
 
         {/* HEADER */}
         <div className="text-center mb-8">
-          <div className="w-12 h-12 bg-[#FFDE59] border-2 border-black flex items-center justify-center mx-auto mb-4 rotate-3 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
+          <div className="w-12 h-12 bg-[#FFDE59] border-2 border-black flex items-center justify-center mx-auto mb-4 
+                rotate-3 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]
+                transform transition-transform duration-500 hover:rotate-180">
             <Zap size={24} fill="black" />
           </div>
           <h1 className="font-black text-3xl mb-2 uppercase tracking-tighter">Fresh Meat?</h1>
           <p className="font-mono text-xs text-gray-600">
             Join the exclusive network for <br />
-            <span className="bg-[#FF914D] px-1 border border-black text-black font-bold">Delhi's Flat Mates</span>
+            <span className="bg-[#FF914D] px-1 border border-black text-black font-bold inline-block" style={{ transform: "rotate(-2deg)" }}>Delhi's Flat Mates</span>
           </p>
         </div>
 
@@ -366,6 +368,10 @@ export default function RegisterPage() {
           </p>
         </div>
 
+        {/* FOOTER NOTE */}
+        <p className="text-center font-mono text-xs text-gray-400 mt-8">
+          By joining, you agree to our <span className="bg-brand-yellow px-1 border border-black text-black inline-block underline" style={{ transform: "rotate( 2deg)" }}>No Creep Policy</span>.
+        </p>
       </div>
     </main>
   );

@@ -85,7 +85,7 @@ function LoginForm() {
 }
 
 export default function LoginPage() {
-    const { status } = useSession();
+  const { status } = useSession();
   const router = useRouter();
 
   useEffect(() => {
@@ -99,7 +99,7 @@ export default function LoginPage() {
     <main className="min-h-screen bg-brand-bg flex flex-col items-center justify-center p-4 relative overflow-hidden">
 
       {/* BACKGROUND DECORATION (The Tape) */}
-      <div className="absolute top-10 -right-10 rotate-12 bg-black text-white py-2 px-20 font-mono text-sm font-bold z-0 pointer-events-none opacity-20">
+      <div className="absolute top-4 -right-10 rotate-12 bg-black text-white py-2 px-27 font-mono text-sm font-bold z-0 pointer-events-none opacity-50">
         STUDENTS ONLY /// STUDENTS ONLY
       </div>
 
@@ -117,13 +117,16 @@ export default function LoginPage() {
 
         {/* HEADER */}
         <div className="text-center mb-8">
-          <div className="w-12 h-12 bg-brand-orange border-2 border-black flex items-center justify-center mx-auto mb-4 rotate-3 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
+          <div className="w-12 h-12 bg-brand-orange border-2 border-black flex items-center justify-center mx-auto mb-4 
+                rotate-3 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]
+                transform transition-transform duration-500 hover:rotate-180">
             <Zap size={24} fill="black" />
           </div>
           <h1 className="font-heavy text-4xl mb-2 uppercase">Welcome In</h1>
           <p className="font-mono text-sm text-gray-600">
             Exclusive access for <br />
-            <span className="bg-brand-yellow px-1 border border-black text-black">Code 148 & 964</span>
+            <span className="bg-brand-yellow px-1 border border-black text-black inline-block"
+              style={{ transform: "rotate(-2deg)" }}>College Students</span>
           </p>
         </div>
 
@@ -172,10 +175,10 @@ export default function LoginPage() {
           CONTINUE WITH GOOGLE
         </button>
 
-       
+
         {/* FOOTER NOTE */}
         <p className="text-center font-mono text-xs text-gray-400 mt-8">
-          By joining, you agree to our <span className="underline decoration-brand-orange decoration-2 text-black cursor-pointer">No Creep Policy</span>.
+          By joining, you agree to our <span className="bg-brand-orange px-1 border border-black text-black inline-block underline" style={{ transform: "rotate( 2deg)" }}>No Creep Policy</span>.
         </p>
       </div>
     </main>
