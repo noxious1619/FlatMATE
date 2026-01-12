@@ -3,7 +3,7 @@ import Navbar from "../../components/Navbar";
 import { Filter, Plus } from "lucide-react";
 import Link from "next/link";
 import prisma from "@/app/lib/prisma";
-import DropdownFilters from "@/app/components/DropdownFilters";
+import DropdownFilters from "@/app/(protected)/components/DropdownFilters";
 import { Category } from "@prisma/client";
 
 export const dynamic = "force-dynamic";

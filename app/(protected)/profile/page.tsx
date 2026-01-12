@@ -5,7 +5,7 @@ import Navbar from "@/app/components/Navbar";
 import { Trash2, Edit2 } from "lucide-react";
 import Link from "next/link";
 import toast from "react-hot-toast";
-import Inbox from "@/app/components/Inbox";
+import Inbox from "@/app/(protected)/components/Inbox";
 
 type Listing = {
   id: string;
