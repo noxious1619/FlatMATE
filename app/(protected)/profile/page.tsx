@@ -5,7 +5,7 @@ import Navbar from "@/app/components/Navbar";
 import { Trash2, Edit2 } from "lucide-react";
 import Link from "next/link";
 import toast from "react-hot-toast";
-
+import Inbox from "@/app/components/Inbox";
 
 type Listing = {
   id: string;
@@ -125,7 +125,7 @@ export default function ProfilePage() {
 
           <div className="text-center md:text-left flex-grow">
             <h1 className="font-heavy text-3xl uppercase">{user?.name || "Anonymous User"}</h1>
-            <p className="font-mono text-sm text-gray-500 mb-2">{user?.college || "College Not Set"} • {user?.email}</p>
+            <p className="font-mono text-sm text-gray-500 mb-2">{user?.college || "College Not Set"}</p>
 
             {user?.emailVerified ? (
               <div className="inline-block bg-green-100 text-green-800 border-2 border-green-600 px-3 py-1 font-mono text-xs font-bold uppercase">
@@ -194,6 +194,8 @@ export default function ProfilePage() {
                 </div>
               ))}
           </div>
+
+          <Inbox />
 
           {/* INACTIVE / FILLED LISTINGS */}
           <h2 className="font-heavy text-xl mt-8 mb-4 border-b-2 border-black inline-block">

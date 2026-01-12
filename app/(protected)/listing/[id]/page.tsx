@@ -1,29 +1,36 @@
 import Navbar from "@/app/components/Navbar";
-import { ArrowLeft, MapPin, IndianRupee, ShieldCheck,User, Users, Share2, Bookmark } from "lucide-react";
+import { ArrowLeft, MapPin, IndianRupee, ShieldCheck, User, Share2, Bookmark } from "lucide-react";
 import Link from "next/link";
 import prisma from "@/app/lib/prisma";
 import { notFound } from "next/navigation";
-import ListingInteraction  from "@/app/(protected)/components/ListingInteraction"; // We will create this next
-import ShareListing  from "@/app/(protected)/components/ShareListing"; // We will create this next
-
+import { getTestUser } from "@/app/lib/mockAuth"; 
+import ListingInteraction from "@/app/(protected)/components/ListingInteraction"; 
+import ShareListing from "@/app/(protected)/components/ShareListing"; 
 
 // Helper to format currency
 const formatPrice = (price: number) => {
     return new Intl.NumberFormat('en-IN').format(price);
 };
 
-export default async function ListingDetails({ params }: { params: Promise<{ id: string }> }) {
-    const { id } = await params;
+// 1. UPDATE TYPE DEFINITION HERE
+type Props = {
+  params: Promise<{ id: string }>;
+};
+
+export default async function ListingDetails(props: Props) {
+    // 2. AWAIT PARAMS HERE
+    const params = await props.params;
+    const { id } = params;
     
-    // TODO: Replace this with your actual Auth session (e.g., getSession or auth())
-    // I am using the ID you provided in your example for now.
-    const currentUserId = "fec254af-ab3f-4fa5-85fe-ca8a39c218bc"; 
+    // 3. Get Current User
+    const user = getTestUser();
+    const currentUserId = user ? user.id : "";
 
     if (!id) {
         notFound();
     }
 
-    // 1. Fetch Listing & Owner
+    // 4. Fetch Listing & Owner
     const listing = await prisma.listing.findUnique({
         where: { id },
         include: {
@@ -34,43 +41,40 @@ export default async function ListingDetails({ params }: { params: Promise<{ id:
                     college: true,
                     image: true,
                     emailVerified: true,
-                    // We DO NOT select phone/email here for privacy. 
-                    // We only fetch those if the request is ACCEPTED.
+                    email: true, 
+                    phoneNumber: true 
                 }
             }
         }
     });
 
-    console.log("Listing fetched:", listing);
-
     if (!listing) {
         notFound();
     }
 
-    // 2. Check Connection Status
-    // We check if the current user has already requested this listing
+    // 5. Check Connection Status
     let requestStatus = null; 
     let contactDetails = null;
 
-    if (currentUserId) {
-        const connection = await prisma.connectionRequest.findFirst({
+    if (user) {
+        const connection = await prisma.connectionRequest.findUnique({
             where: {
-                senderId: currentUserId,
-                listingId: listing.id
+                senderId_listingId: {
+                    senderId: user.id,
+                    listingId: listing.id
+                }
             }
         });
 
         if (connection) {
-            requestStatus = connection.status; // "PENDING", "ACCEPTED", "REJECTED"
-        }
-
-        // 3. IF ACCEPTED: Fetch the secret contact details now
-        if (requestStatus === "ACCEPTED") {
-            const secretOwnerData = await prisma.user.findUnique({
-                where: { id: listing.owner.id },
-                select: { email: true, phone: true } // Now it's safe to get these
-            });
-            contactDetails = secretOwnerData;
+            requestStatus = connection.status; 
+            
+            if (connection.status === "ACCEPTED") {
+                contactDetails = {
+                    phone: listing.owner.phoneNumber,
+                    email: listing.owner.email
+                };
+            }
         }
     }
 
@@ -106,7 +110,7 @@ export default async function ListingDetails({ params }: { params: Promise<{ id:
                     <div className="md:col-span-2 space-y-6">
 
                         {/* HERO IMAGE */}
-                        <div className="retro-card p-2 rotate-1">
+                        <div className="bg-white p-2 rotate-1 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] border-2 border-black">
                             <img
                                 src={listing.images[0] || "/placeholder.png"}
                                 alt="Room Main"
@@ -120,22 +124,24 @@ export default async function ListingDetails({ params }: { params: Promise<{ id:
                                 <h1 className="font-heavy text-3xl md:text-5xl uppercase leading-none mb-2">
                                     {listing.title}
                                 </h1>
-                                <button className="p-2 border-2 border-black bg-white hover:bg-black hover:text-white transition-colors shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] ml-2 mr-3">
-                                    <Bookmark size={20}  />
-                                </button>
-                                <ShareListing />
+                                <div className="flex gap-2">
+                                    <button className="p-2 border-2 border-black bg-white hover:bg-black hover:text-white transition-colors shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
+                                        <Share2 size={20} />
+                                    </button>
+                                    <button className="p-2 border-2 border-black bg-white hover:bg-black hover:text-white transition-colors shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
+                                        <Bookmark size={20}  />
+                                    </button>
+                                </div>
                             </div>
 
                             {listing.address && (
-                            <div className="flex-col items-start gap-2 font-mono text-gray-600 mb-4">
+                            <div className="flex flex-col items-start gap-2 font-mono text-gray-600 mb-4">
                                 <div className="flex mt-2 mb-5 items-center text-xl">
-                                    <MapPin size={25} className="mr-2 items-center flex justify-center"/>
+                                    <MapPin size={25} className="mr-2 text-black"/>
                                     <p>{listing.address}</p>
                                 </div>
-                                <div className="flex items-center gap-2 text-xl text-black border-2 p-3 bg-amber-600 mt-3 w-32 h-15 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
-                                    {listing.category === "BOYS" && <User size={30} />}
-                                    {listing.category === "GIRLS" && <User size={30} />}
-                                    {listing.category === "ANYONE" && <User size={30} />}
+                                <div className="flex items-center gap-2 text-sm font-bold text-black border-2 border-black px-3 py-1 bg-brand-yellow shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]">
+                                    <User size={18} />
                                     <span>{listing.category}</span>
                                 </div>                                
                             </div>
@@ -149,7 +155,7 @@ export default async function ListingDetails({ params }: { params: Promise<{ id:
                                     </span>
                                 </div>
                                 {listing.deposit && (
-                                    <div className="bg-white border-2 border-black px-4 py-2 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] opacity-60">
+                                    <div className="bg-white border-2 border-black px-4 py-2 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] opacity-80">
                                         <span className="block font-mono text-xs text-gray-500">DEPOSIT</span>
                                         <span className="font-heavy text-xl flex items-center">
                                             <IndianRupee size={16} strokeWidth={3} />{formatPrice(listing.deposit)}
@@ -159,29 +165,25 @@ export default async function ListingDetails({ params }: { params: Promise<{ id:
                             </div>
                         </div>
 
-                        <div>
-                            
-                        </div>
-
                         {/* VIBE TAGS */}
                         <div>
                             <h3 className="font-heavy text-xl mb-3 uppercase border-b-2 border-black inline-block">The Vibe</h3>
                             <div className="flex flex-wrap gap-3">
-                                {tags.map((tag, i) => (
+                                {tags.length > 0 ? tags.map((tag, i) => (
                                     <span key={i} className="px-3 py-1 font-mono font-bold border-2 border-black bg-white rounded-full text-sm">
                                         {tag}
                                     </span>
-                                ))}
+                                )) : <span className="text-gray-500 font-mono text-sm">No specific tags.</span>}
                             </div>
                         </div>
 
                         {/* DESCRIPTION */}
-                        <div className="bg-white border-2 border-black p-6 shadow-retro relative">
+                        <div className="bg-white border-2 border-black p-6 shadow-retro relative mt-8">
                             <div className="absolute -top-3 -right-3 bg-brand-yellow px-2 py-1 border-2 border-black font-mono text-xs font-bold rotate-3">
                                 READ ME
                             </div>
                             <p className="font-mono leading-relaxed text-sm md:text-base whitespace-pre-wrap">
-                                {listing.description}
+                                {listing.description || "No description provided."}
                             </p>
                         </div>
                     </div>
