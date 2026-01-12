@@ -1,7 +1,7 @@
 model User {
   id String @id @default(cuid())
 
-  role         Role   @default(USER)
+  role          Role      @default(USER)
   email         String    @unique
   passwordHash  String?
   emailVerified DateTime?
