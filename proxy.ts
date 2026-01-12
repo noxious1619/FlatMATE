@@ -14,11 +14,11 @@ export default withAuth(
     if (token && isAuthPage) {
       return NextResponse.redirect(new URL("/feed", req.url));
     }
-
+    console.log("Token:", token);
     // Not Allow - Unverified users
     if (
       token &&
-      token.emailVerified===null &&
+      !token.emailVerified &&
       !pathname.startsWith("/verification-pending") &&
       !pathname.startsWith("/verify-email") &&
       !isAuthPage
