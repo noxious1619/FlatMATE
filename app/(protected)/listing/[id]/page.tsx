@@ -125,9 +125,10 @@ export default async function ListingDetails(props: Props) {
                                     {listing.title}
                                 </h1>
                                 <div className="flex gap-2">
-                                    <button className="p-2 border-2 border-black bg-white hover:bg-black hover:text-white transition-colors shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
+                                    {/* <button className="p-2 border-2 border-black bg-white hover:bg-black hover:text-white transition-colors shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
                                         <Share2 size={20} />
-                                    </button>
+                                    </button> */}
+                                    <ShareListing />
                                     <button className="p-2 border-2 border-black bg-white hover:bg-black hover:text-white transition-colors shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
                                         <Bookmark size={20}  />
                                     </button>
