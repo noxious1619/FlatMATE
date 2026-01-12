@@ -60,35 +60,48 @@ export const authOptions: NextAuthOptions = {
       if (session.user && token.sub) {
         session.user.id = token.sub;
         session.user.role = token.role as string;
+        session.user.isBlacklisted = token.isBlacklisted as boolean;
       }
       return session;
-    },
+    }
+    ,
     async jwt({ token, user }) {
+      // On first login
       if (user) {
         token.sub = user.id;
-        token.role= user.role? user.role : "USER";
+        token.role = user.role ? user.role : "USER";
+
+        // 🔥 Fetch blacklist status
+        const dbUser = await prisma.user.findUnique({
+          where: { id: user.id },
+          select: { isBlacklisted: true },
+        });
+
+        token.isBlacklisted = dbUser?.isBlacklisted ?? false;
       }
+
       return token;
-    },
-    async signIn({ user, account }) {
-    if (account?.provider === "google") {
-      await prisma.user.upsert({
-        where: { email: user.email! },
-        update: {
-          emailVerified: new Date(),
-        },
-        create: {
-          email: user.email!,
-          emailVerified: new Date(),
-          name: user.name!,
-          passwordHash: null,
-          role: "USER",
-          image: user.image!,
-        },
-      });
     }
-    return true;
-  },
+    ,
+    async signIn({ user, account }) {
+      if (account?.provider === "google") {
+        await prisma.user.upsert({
+          where: { email: user.email! },
+          update: {
+            emailVerified: new Date(),
+          },
+          create: {
+            email: user.email!,
+            emailVerified: new Date(),
+            name: user.name!,
+            passwordHash: null,
+            role: "USER",
+            image: user.image!,
+          },
+        });
+      }
+      return true;
+    },
   },
 
   pages: {

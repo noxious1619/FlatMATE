@@ -6,6 +6,10 @@ export default withAuth(
     const token = req.nextauth.token;
     const { pathname } = req.nextUrl;
 
+ if (token?.isBlacklisted && !pathname.startsWith("/blacklisted")) {
+      return NextResponse.redirect(new URL("/blacklisted", req.url));
+    }
+
     const isAuthPage =
       pathname.startsWith("/login") ||
       pathname.startsWith("/signup");
@@ -58,7 +62,7 @@ export const config = {
         "/login/:path*",
         "/signup/:path*",
 
-        "/block",
+        "/blacklisted",
         "/chats/:path*",
         "/feed",
         "/guidelines",
