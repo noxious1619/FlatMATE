@@ -1,27 +1,27 @@
 model Listing {
-  id                 String         @id @default(cuid())
+  id                 String              @id @default(cuid())
   title              String
   description        String
   price              Int
   images             String[]
-  isAvailable        Boolean        @default(true)
-  tag_ac             Boolean        @default(false)
-  tag_cooler         Boolean        @default(false)
-  tag_noBrokerage    Boolean        @default(false)
-  tag_wifi           Boolean        @default(false)
-  tag_cook           Boolean        @default(false)
-  tag_maid           Boolean        @default(false)
-  tag_geyser         Boolean        @default(false)
-  tag_metroNear      Boolean        @default(false)
-  tag_noRestrictions Boolean        @default(false)
-  createdAt          DateTime       @default(now())
-  updatedAt          DateTime       @updatedAt
+  isAvailable        Boolean             @default(true)
+  tag_ac             Boolean             @default(false)
+  tag_cooler         Boolean             @default(false)
+  tag_noBrokerage    Boolean             @default(false)
+  tag_wifi           Boolean             @default(false)
+  tag_cook           Boolean             @default(false)
+  tag_maid           Boolean             @default(false)
+  tag_geyser         Boolean             @default(false)
+  tag_metroNear      Boolean             @default(false)
+  tag_noRestrictions Boolean             @default(false)
+  createdAt          DateTime            @default(now())
+  updatedAt          DateTime            @updatedAt
   ownerId            String
   address            String?
   college            String?
-  category           String         @default("ANY")
+  category           String              @default("ANY")
   deposit            Int?
-  owner              User           @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  owner              User                @relation(fields: [ownerId], references: [id], onDelete: Cascade)
   savedByUsers       SavedListing[]
   connectionRequests ConnectionRequest[]
 }
