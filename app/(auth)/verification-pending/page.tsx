@@ -11,6 +11,11 @@ function PendingContent() {
     const searchParams = useSearchParams();
     const email = searchParams.get("email");
 
+    function resendVerification() {
+        //TODO: Logic to resend verification email
+        toast.success("Verification email resent!");
+    }
+
     return (
         <>
             <p className="font-mono text-sm mb-6">
@@ -34,6 +39,11 @@ function PendingContent() {
             <p className="font-mono text-xs text-gray-500 mb-6">
                 Didn't receive it? Check your spam folder or try waiting a minute.
             </p>
+
+            {/* Resend Verification Email */}
+            <button onClick={resendVerification} className="block w-full text-center mb-2 bg-gray-200 text-black border-2 border-black py-3 font-mono font-bold text-lg hover:bg-[#FFDE59] hover:text-black transition-all shadow-[4px_4px_0px_0px_rgba(0,0,0,0.2)] hover:shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:-translate-y-1 active:translate-y-0 active:shadow-none">
+                RESEND VERIFICATION EMAIL
+            </button>
 
             <Link
                 href="/login"

@@ -72,6 +72,6 @@ export const config = {
         "/admin/:path*",
 
         "/verification-pending/:path*",
-        "/verify-email/:path*",
+        // "/verify-email/:path*",
     ]
 };
