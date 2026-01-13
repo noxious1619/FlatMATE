@@ -15,7 +15,7 @@ export async function GET() {
       },
       include: {
         location: true,
-        college: {
+        collegeDetails: {
           select: {
             id: true,
             name: true,
@@ -35,10 +35,7 @@ export async function GET() {
     return NextResponse.json(listings);
   } catch (error) {
     console.error("Error fetching listings:", error);
-    return NextResponse.json(
-      { error: "Failed to load feed" },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: "Failed to load feed" }, { status: 500 });
   }
 }
 

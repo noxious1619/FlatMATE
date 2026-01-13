@@ -1,4 +1,5 @@
 import NextAuth, { DefaultSession } from "next-auth";
+import { DefaultJWT } from "next-auth/jwt";
 
 declare module "next-auth" {
   interface Session {
@@ -6,13 +7,21 @@ declare module "next-auth" {
       id: string;
       role: string;
       isBlacklisted: boolean;
+      emailVerified: Date | null;
     } & DefaultSession["user"];
+  }
+
+  interface User {
+    role: string;
+    emailVerified: Date | null;
   }
 }
 
 declare module "next-auth/jwt" {
-  interface JWT {
-    role: string;
-    isBlacklisted: boolean;
+  interface JWT extends DefaultJWT {
+    role?: string;
+    isBlacklisted?: boolean;
+    emailVerified?: Date | null;
+    last_synced?: number;
   }
 }

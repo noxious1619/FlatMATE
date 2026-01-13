@@ -45,7 +45,7 @@ export const authOptions: NextAuthOptions = {
           email: user.email,
           name: user.name,
           role: user.role,
-          emailVerified: user.emailVerified? user.emailVerified.toISOString() : null,
+          emailVerified: user.emailVerified ?? null,
         };
       },
     }),
@@ -62,7 +62,7 @@ export const authOptions: NextAuthOptions = {
       if (session.user && token.sub) {
         session.user.id = token.sub;
         session.user.role = token.role as string;
-        session.user.emailVerified = token.emailVerified as string | null;
+        session.user.emailVerified = token.emailVerified ?? null;
         session.user.isBlacklisted = token.isBlacklisted as boolean;
       }
       return session;
@@ -79,7 +79,7 @@ export const authOptions: NextAuthOptions = {
       if (dbUser) {
         token.isBlacklisted = dbUser.isBlacklisted;
         token.role = dbUser.role;
-        token.emailVerified = dbUser.emailVerified ? dbUser.emailVerified.toISOString() : null;
+        token.emailVerified = dbUser.emailVerified ?? null;
       }
       token.last_synced = now;
     }
@@ -87,7 +87,7 @@ export const authOptions: NextAuthOptions = {
       if (user) {
         token.sub = user.id;
         token.role= user.role? user.role : "USER";
-        token.emailVerified= user.emailVerified? user.emailVerified : null;
+        token.emailVerified= user.emailVerified ?? null;
         token.role = user.role ? user.role : "USER";
         token.last_synced = now;
 
