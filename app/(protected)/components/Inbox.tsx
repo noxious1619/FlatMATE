@@ -49,7 +49,7 @@ export default function Inbox() {
         // The API returns pending, accepted, and rejected. 
         // For the main list, we usually only want PENDING requests to act on.
         // Or if you want to see history, keep all. Let's filter for PENDING for now.
-        const pendingOnly = data.filter((r: IncomingRequest) => r.status === "PENDING");
+        const pendingOnly = data.filter((r: IncomingRequest) => r.status === "PENDING" || r.status === "ACCEPTED");
         console.log("pending only:", pendingOnly);
         
         setRequests(pendingOnly);

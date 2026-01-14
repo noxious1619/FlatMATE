@@ -1,6 +1,6 @@
 export function getTestUser() {
   return {
-    id: "cmk5fk9br0005vp2dv8t0q3z6",
+    id: "cmkcm7bvq0000d2g3629kwuad",
     isVerified: true,
     isBlacklisted: false,
   };

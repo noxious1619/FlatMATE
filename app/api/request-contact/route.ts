@@ -1,3 +1,6 @@
+// app/api/request-contact/route.ts
+// this fetches the data about the request of the owner/receiver
+
 import { NextResponse } from "next/server";
 import prisma from "@/app/lib/prisma";
 import { getServerSession } from "next-auth";

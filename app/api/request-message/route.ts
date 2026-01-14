@@ -1,3 +1,5 @@
+// app/api/request-message/route.ts
+
 import { NextResponse } from "next/server";
 import prisma from "@/app/lib/prisma";
 
@@ -8,7 +10,10 @@ export async function POST(request: Request) {
 
     // 1. First, find the listing to know who the OWNER (Receiver) is
     const listing = await prisma.listing.findUnique({
-      where: { id: listingId },
+      where: { 
+        id: listingId,
+        ownerId: userId
+       },
     });
 
     if (!listing) {
