@@ -244,7 +244,6 @@ export default async function ListingDetails(props: Props) {
                                     currentUserId={currentUserId}
                                     initialStatus={requestStatus}
                                     ownerName={listing.owner.name || "User"}
-                                    contactDetails={contactDetails}
                                 />
                                 {/* ----------------------------------- */}
 
